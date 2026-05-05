@@ -4,13 +4,39 @@ from __future__ import annotations
 
 import argparse
 
-from password_generator.generator import generate_password
-
 
 def build_parser() -> argparse.ArgumentParser:
-    """Cria e retorna o parser da CLI com argparse."""
+    """Cria e retorna o parser da CLI com argparse.
+
+    Returns:
+        Parser configurado com os argumentos da linha de comando.
+    """
     parser = argparse.ArgumentParser(
         description="Gerador de senhas seguras (argparse)."
+    )
+    parser.add_argument(
+        "--upper",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Habilita ou desabilita letras maiusculas (padrao: desabilitado).",
+    )
+    parser.add_argument(
+        "--lower",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Habilita ou desabilita letras minusculas (padrao: habilitado).",
+    )
+    parser.add_argument(
+        "--number",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Habilita ou desabilita numeros (padrao: desabilitado).",
+    )
+    parser.add_argument(
+        "--wildcards",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Habilita ou desabilita caracteres especiais (padrao: desabilitado).",
     )
     parser.add_argument(
         "--length",
@@ -21,12 +47,4 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
-    """Executa a CLI baseada em argparse."""
-    parser = build_parser()
-    args = parser.parse_args()
-    print(generate_password(args.length))
 
-
-if __name__ == "__main__":
-    main()

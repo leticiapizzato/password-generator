@@ -11,4 +11,8 @@ requires-python = ">=3.10.5"
 dependencies = []
 
 [project.scripts]
-password-gen-argparse = "password_generator.cli_argparse:main"
+password-gen-argparse = "main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["cli_argparse", "generator", "main"]
