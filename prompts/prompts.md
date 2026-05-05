@@ -101,11 +101,68 @@ Pode deixar de fora o diretório tests.
 Lembre-se que houve mudança no path de alguns arquivos, utilize o git mv ao invés de remover os arquivos excluidos e os adicionar novamente.
 ```
 
-
-#### Prompt 11 - Criação da função principal
+#### Prompt 13 - Revisão crítica
 ```powershell
-Contexto: Projeto MVP de gerador de senhas, em Ptyhon com argparse
-Objetivo: Criar um arquivo src/main.py que chame as funções responsáveis pelo parse dos comandos e da função de geração de senha.
-Estilo: Respeitar PEP8, código limpo simples e claro.
-Resposta: Arquivo src/main.py coerente e executando sem erros.
+Revise os arquivos do projeto e responda:
+1 - Onde faltam validações?
+2 - Quais 5 testes que devo priorizar?
+Resposta em checklist.
 ```
+
+#### Prompt 14 - Ajustes de validação main.
+```powershell
+Contexto: Ajustes de validações em main.py.
+Objetivo: Ajustar tratamento de erro ValueParse em src/main.py.
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Ajustes no arquivo src/main.py deixando coerente e executando sem erros.
+```
+
+#### Prompt 15 - Ajustes de validação do length
+```powershell
+Contexto: Ajustes de validações do argumento --length
+Objetivo: Para o parametro length: Ajustar validação explicita em src/generator.py e validar limite máximo de caracteres para 32 em src/cli_argparse.py
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Ajustes nos arquivos src/generator.py e src/cli_argparse.py, deixando coerentes e executando sem erros.
+```
+
+#### Prompt 16 - Revisão de documentações
+```powershell
+Contexto: Revisão das documentações
+Objetivo: Revisão dos documentos criados, para manter coerencia com o implmentado.
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Ajustar documentos README, pyproject.toml, .gitignore, docs/escopo-mvp.md
+```
+
+#### Prompt 17 - Commits
+```powershell
+Existem várias alterações no meu repositório.
+Faça commits separados por  módulos, considerando o padrão Conventional commits para cada um.
+Pode deixar de fora o diretório tests.
+Lembre-se de enviar para o servidor (push).
+```
+
+#### Prompt 14 - 
+```powershell
+Contexto: Revisão das documentações
+Objetivo: Revisão dos documentos criados, para manter coerencia com o implmentado.
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Ajustar documentos README, pyproject.toml, .gitignore, docs/escopo-mvp.md
+
+ Teste 1 (regra mínima): deve falhar com ValueError quando length < 8.
+
+ Teste 2 (nenhuma classe ativa): deve falhar com ValueError quando upper=False, lower=False, number=False, wildcards=False.
+
+ Teste 3 (tamanho correto): deve retornar senha com tamanho exato para combinações válidas (ex.: length=16).
+
+ Teste 4 (classes obrigatórias presentes): quando múltiplas classes estão ativas, senha deve conter ao menos 1 char de cada classe ativa.
+
+ Teste 5 (integração CLI): executar main/CLI com argumentos e validar saída (sucesso) e erro amigável (falha), incluindo código de retorno.
+```
+
+
+
+camada de testes
+revisão critica de coerencia dos requisitos funcionais
+revisão critica dos testes implementados
+validação dos testes
+validação de execução
