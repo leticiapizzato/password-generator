@@ -184,3 +184,119 @@ Resposta: Ajustar documentos README, pyproject.toml, .gitignore, docs/escopo-mvp
 Existem várias alterações no meu repositório.
 Faça commits separados por módulos, considerando o padrão Conventional commits para cada um.
 ```
+
+#### Prompt 22 - Commits
+```powershell
+Posso acreditar que você fez o push dessa vez? se não fez, faça.
+```
+
+#### Prompt 23 - Ampliação da cobertura de testes e validações
+```powershell
+Contexto: Ampliação dos testes e validações do projeto
+Objetivo: Aumentar a cobertura dos testes, implementando testes que validem: length com tipo inválido, regra de compatibilidade de length < que classes ativas, testes que validem o default e entrypoint intalado no ambiente de pacotes.
+Estilo: Código limpo, simples e claro.
+Resposta: Ajustar arquivo de testes em tests/test_generator.py
+```
+
+#### Prompt 24 - Makefile
+```powershell
+Contexto: Projeto de gerador de senhas seguras com argparse, com instalação de depencias, que possibilite executar o projeto e rodar os testes de validação.
+Objetivo: Gerar Makefile com targets install, run e test.
+Estilo: Simples e portável.
+Resposta: Crie o arquivo completo de Makefile.
+```
+
+#### Prompt 25 - Revisão de README
+```powershell
+Analise meu README e faça:
+1 - O que falta para ser reproduzível em máquina local
+2 - seção com erros esperados
+3 - Exemplos de execução
+Ajuste o arquivo README.
+```
+
+#### Prompt 26 - Execução do Makefile
+```powershell
+Valide as possiveis execuções do makefile: make, make install, make run, make test
+```
+
+#### Prompt 27 - Execução do Makefile - ajustes
+```powershell
+Faça os ajustes necessários para executar o make.
+Faça tabém as alterações no ambiente virtual e arquivos necessários para que ele esteja apto a rodar tudo (testes, make e entrypoint/execuções) sem erros.
+```
+
+#### Prompt 28 - Execução do projeto
+```powershell
+Eu queria ver o projeto rodando. Execute ele para mim, mostrando os comandos de entrada e as senhas seguras de saída.
+```
+
+#### Prompt 29 - Execução dos testes
+```powershell
+Agora também temos os testes, podemos executa-lo e verificar se está tudo correto. Faça essa avaliação para mim.
+```
+
+#### Prompt 30 - Checklist de release
+```powershell
+Contexto: Vou publicar a versão v1.0.0 no GitHub.
+Objetivo: Gerar checklist final com itens técnicos e de documentos para release.
+Estilo: Checkbox com markdown.
+Resposta: Lista completa no arquivo docs/release.md
+```
+
+#### Prompt 31 - Commits
+```powershell
+Inclua o target de uninstall no arquivo Makefile. E valide que está funcionando com .\make uninstall.
+```
+
+#### Prompt 32 - Validação do ambiente virtual
+```powershell
+Valide que o ambiente virtual está atualizado. Caso não esteja, atualize-o.
+```
+
+#### Prompt 33 - Validação do pyproject.toml
+```powershell
+Valide que o arquivo pyproject.toml está atualizado. Caso não esteja, atualize-o.
+```
+
+#### Prompt 34 - Validação do README
+```powershell
+Valide que o arquivo README está atualizado. Caso não esteja, atualize-o.
+Favor incluir informações relevantes do Makefile caso não exista. E atualizar as formas de executar o projeto.
+```
+
+#### Prompt 35 - Atualização do README
+```powershell
+Poxa vida, o README está bem confuso e com informações repetidas. Faça os ajustes necessários para que ele seja claro, direto e simpes de ler. tendo informações relevantes e não repetidas.
+```
+
+#### Prompt 36 - Atualização do README
+```powershell
+Contexto: Arquivo README com informações relevantes do projeto
+Objetivo: atualizar o readme para que contenha apenas informações relevantes do projeto e não repetidas
+Estilo: simples e direto
+Resposta: arquivo readme atualizado, com informações detalhadas sobre o projeto, formas de uso - exemplo dos parametros, erros possíveis, como configurar o ambiente, instalar e testar. Além disso, mostrar o uso do makefile e seus targets disponíveis install//uninstall/run/test. Avalie possíveis informações faltaantes e adicione de forma coerente.
+```
+
+#### Prompt 37 - CI simples para teste
+```powershell
+Contexto: CI para execução dos testes no commit.
+Objetivo: Criar um CI (GitHub Actions) simples que rode os testes a cada PUSH/PR.
+Estilo: Simples e legível.
+Resposta: Arquivo de ci válido.
+```
+
+#### Prompt 38 - Commits
+```powershell
+Faça os ajustes necessários no repositorio para garantir que o arquivo ci.yml seja executado com commit/pr.
+```
+
+#### Prompt 39 - Commits
+```powershell
+Existem várias modifiçãoes. Faça commit por módulo, utilizando conventional commits.
+Lembre-se de executar o push.
+```
+
+
+
+
