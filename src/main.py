@@ -15,13 +15,17 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
-    password = generate_password(
-        length=args.length,
-        upper=args.upper,
-        lower=args.lower,
-        number=args.number,
-        wildcards=args.wildcards,
-    )
+    try:
+        password = generate_password(
+            length=args.length,
+            upper=args.upper,
+            lower=args.lower,
+            number=args.number,
+            wildcards=args.wildcards,
+        )
+    except ValueError as error:
+        parser.error(str(error))
+
     print(password)
 
 

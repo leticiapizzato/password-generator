@@ -26,12 +26,19 @@ def generate_password(
         Senha gerada aleatoriamente.
 
     Raises:
+        TypeError: Se o tipo de length nao for inteiro.
         ValueError: Se o tamanho solicitado for menor que 8.
+        ValueError: Se o tamanho solicitado for maior que 32.
         ValueError: Se nenhuma classe de caractere for selecionada.
         ValueError: Se o tamanho for menor que a quantidade de classes ativas.
     """
+    if not isinstance(length, int):
+        raise TypeError("O parametro length deve ser do tipo inteiro.")
+
     if length < 8:
         raise ValueError("O tamanho minimo recomendado e 8 caracteres.")
+    if length > 32:
+        raise ValueError("O tamanho maximo permitido e 32 caracteres.")
 
     selected_sets: list[str] = []
     if upper:
