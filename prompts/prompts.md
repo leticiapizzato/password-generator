@@ -35,7 +35,7 @@ Tonalidade: A linguagem deve ser técnica, porém amigável.
 Resposta: Atualização do arquivo docs/escopo-mvp.md.
 ```
 
-#### Prompt 4 - README
+#### Prompt 5 - README
 ```powershell
 Contexto: MVP para geração de senhas seguras utilizando argparse.
 Objetivo: Melhorar o README inicial, incluindo objetivo detalhado, stack, informações de como rodar o projeto e os testes e um roadmap de releases, baseado nos requisitos definidos.
@@ -43,10 +43,69 @@ Estilo: Incluir markdown simples, direto e profissional.
 Resposta: Atualização do arquivo README.
 ```
 
-#### Prompt 5 - Primeiro commit
+#### Prompt 6 - Primeiro commit
 ```powershell
 Contexto: Adicionei estrutura inicial de código e testes, README, .gitignore. Veja também outras alterações que não estão listadas.
 Objetivo: criar mensagem adequada de commit.
 Estilo: Utilize o padrão Conventional Commits para a mensagem.
 Resposta: Faça o commit para mim, com apenas uma linha de mensagem no commit.
+```
+
+#### Prompt 7 - Adicionar parametros do argparse
+```powershell
+Contexto: Argumentos de entrada para a CLI.
+Objetivo: Adicionar os argumentos que serão configurados pelo usuário: upper (para letras maiusculas), lower (para letras minusculas), number (para números), wildcards (para caracteres especiais) e length (para tamanho)
+Estilo: Código simples e legível, comentários relevantes em docstrings
+Resposta: Alteração do arquivo src/password_generator/cli_argparse.py.
+```
+#### Prompt 8 - Definir opções default
+```powershell
+Contexto: Argumentos de entrada para a CLI.
+Objetivo: Definir que a configuração padrão (default) de entrada seja apenas minusculas, de tamanho 16. Outras opções serão desabilitadas por padrão.
+Estilo: Código simples e legível, comentários relevantes em docstrings
+Resposta: Alteração do arquivo src/password_generator/cli_argparse.py.
+```
+
+#### Prompt 9 - Adicionar parametros no gerador de senhas 
+```powershell
+Contexto: Criação do core de geração de senhas, a partir da entrada do usuário
+Objetivo: Função core do projeto, responsável pela geração de senhas, considerando os inputs do usuário.
+Estilo: Código simples e legível, comentários relevantes em docstrings
+Resposta: Alteração do arquivo src/password_generator/generator.py.
+```
+
+#### Prompt 10 - Remover um nível de diretório
+```powershell
+vamos mover tudo que está em src/password_generator para src/. estou achando desnecessária o nível "password_genarator".
+Faça os ajustes necessários para manter a coerencia dos códigos já criados.
+```
+
+#### Prompt 11 - Criação da função principal
+```powershell
+Contexto: Projeto MVP de gerador de senhas, em Ptyhon com argparse
+Objetivo: Criar um arquivo src/main.py que chame as funções responsáveis pelo parse dos comandos e da função de geração de senha.
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Arquivo src/main.py coerente e executando sem erros.
+```
+
+#### Prompt 11 - Criação da função principal
+```powershell
+Me parece que existe duplicata de main(). Você pode revisar os arquivos src/main.py e src/cli_argparse.py, mantendo a main apenas no main.py
+```
+
+#### Prompt 12 - Commits
+```powershell
+Existem várias alterações no meu repositório.
+Faça commits separados por  módulos, considerando o padrão Conventional commits para cada um.
+Pode deixar de fora o diretório tests.
+Lembre-se que houve mudança no path de alguns arquivos, utilize o git mv ao invés de remover os arquivos excluidos e os adicionar novamente.
+```
+
+
+#### Prompt 11 - Criação da função principal
+```powershell
+Contexto: Projeto MVP de gerador de senhas, em Ptyhon com argparse
+Objetivo: Criar um arquivo src/main.py que chame as funções responsáveis pelo parse dos comandos e da função de geração de senha.
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Arquivo src/main.py coerente e executando sem erros.
 ```
