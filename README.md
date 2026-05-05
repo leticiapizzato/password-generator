@@ -22,8 +22,8 @@ Entregar um MVP para geração de senhas seguras no terminal, priorizando:
 
 ## Estrutura do Projeto
 
-- `src/password_generator/generator.py`: lógica de geração de senha.
-- `src/password_generator/cli_argparse.py`: interface CLI com argparse.
+- `src/generator.py`: lógica de geração de senha.
+- `src/cli_argparse.py`: interface CLI com argparse.
 - `tests/test_generator.py`: testes automatizados iniciais.
 - `docs/escopo-mvp.md`: escopo funcional e critérios de aceite do MVP.
 
