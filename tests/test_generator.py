@@ -14,6 +14,7 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+from cli_argparse import build_parser
 from generator import generate_password
 
 
@@ -63,6 +64,36 @@ def test_generate_password_contains_all_selected_classes() -> None:
     assert any(char in string.punctuation for char in password)
 
 
+def test_generate_password_fails_for_invalid_length_type() -> None:
+    """Deve falhar quando o tipo de length nao for inteiro."""
+    with pytest.raises(TypeError, match="tipo inteiro"):
+        generate_password(length="16")  # type: ignore[arg-type]
+
+
+def test_generate_password_fails_for_incompatible_length_and_classes() -> None:
+    """Deve falhar para configuracao incompativel de tamanho e classes."""
+    with pytest.raises(ValueError):
+        generate_password(
+            length=3,
+            upper=True,
+            lower=True,
+            number=True,
+            wildcards=True,
+        )
+
+
+def test_cli_parser_defaults() -> None:
+    """Valida os valores padrao definidos para a CLI."""
+    parser = build_parser()
+    args = parser.parse_args([])
+
+    assert args.length == 16
+    assert args.lower is True
+    assert args.upper is False
+    assert args.number is False
+    assert args.wildcards is False
+
+
 def test_cli_integration_success() -> None:
     """Deve gerar senha com sucesso via CLI."""
     result = subprocess.run(
@@ -88,3 +119,19 @@ def test_cli_integration_error_for_invalid_length() -> None:
 
     assert result.returncode != 0
     assert "entre 8 e 32" in result.stderr
+
+
+def test_cli_installed_entrypoint_success() -> None:
+    """Valida execucao do entrypoint instalado no ambiente."""
+    exe_name = "password-gen-argparse.exe" if sys.platform.startswith("win") else "password-gen-argparse"
+    entrypoint = Path(sys.executable).with_name(exe_name)
+
+    result = subprocess.run(
+        [str(entrypoint), "--length", "16", "--lower"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert len(result.stdout.strip()) == 16
