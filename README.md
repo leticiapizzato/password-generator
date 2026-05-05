@@ -9,7 +9,7 @@ Entregar um MVP para geração de senhas seguras no terminal, priorizando:
 
 - simplicidade de uso em CLI
 - geração com aleatoriedade criptograficamente segura (`secrets`)
-- validação de parâmetros essenciais
+- validação explícita dos parâmetros de entrada
 - base evolutiva para regras de composição configuráveis
 
 ## Stack
@@ -22,8 +22,9 @@ Entregar um MVP para geração de senhas seguras no terminal, priorizando:
 
 ## Estrutura do Projeto
 
-- `src/generator.py`: lógica de geração de senha.
-- `src/cli_argparse.py`: interface CLI com argparse.
+- `src/main.py`: ponto de entrada da aplicação.
+- `src/cli_argparse.py`: configuração e validação dos argumentos CLI.
+- `src/generator.py`: core de geração de senha.
 - `tests/test_generator.py`: testes automatizados iniciais.
 - `docs/escopo-mvp.md`: escopo funcional e critérios de aceite do MVP.
 
@@ -45,12 +46,22 @@ pip install -e .
 ### 3. Executar a CLI
 
 ```powershell
-password-gen-argparse --length 20
+password-gen-argparse --length 16
 ```
 
-Parâmetro disponível atualmente:
+Parâmetros disponíveis:
 
-- `--length`: tamanho da senha (padrão: `16`, mínimo recomendado: `8`)
+- `--length`: tamanho da senha (entre `8` e `32`, padrão: `16`)
+- `--lower` / `--no-lower`: letras minúsculas (padrão: habilitado)
+- `--upper` / `--no-upper`: letras maiúsculas (padrão: desabilitado)
+- `--number` / `--no-number`: números (padrão: desabilitado)
+- `--wildcards` / `--no-wildcards`: caracteres especiais (padrão: desabilitado)
+
+Exemplo com múltiplos critérios:
+
+```powershell
+password-gen-argparse --length 20 --upper --number --wildcards
+```
 
 ## Como Rodar os Testes
 
@@ -68,17 +79,12 @@ Roadmap baseado nos requisitos definidos em `docs/escopo-mvp.md`.
 ### v0.1.0 - Base do MVP
 
 - geração de senha segura com `secrets`
-- parâmetro `--length` com valor padrão 16
-- validação de tamanho mínimo
+- parâmetro `--length` com valor padrão 16 e faixa de 8 a 32
 - estrutura inicial de testes
 
 ### v0.2.0 - Critérios de Composição na CLI
 
-- opções para habilitar/desabilitar:
-- letras minúsculas
-- letras maiúsculas
-- números
-- caracteres especiais
+- opções para habilitar/desabilitar minúsculas, maiúsculas, números e especiais
 - validação para impedir execução sem classes de caractere ativas
 
 ### v0.3.0 - Regras de Consistência e Qualidade

@@ -4,7 +4,7 @@
 
 Definir e implementar um **MVP (Minimum Viable Product)** de linha de comando para geração de senhas seguras em Python, com interface baseada em `argparse`.
 
-O MVP deve permitir ao usuário gerar senhas aleatórias fortes, com parâmetros básicos de tamanho, validação mínima de entrada e comportamento previsível para uso local em terminal.
+O MVP deve permitir ao usuário gerar senhas aleatórias fortes, com parâmetros de composição configuráveis, validações explícitas de entrada e comportamento previsível para uso local em terminal.
 
 ## 2. Requisitos Funcionais
 
@@ -12,13 +12,13 @@ O MVP deve permitir ao usuário gerar senhas aleatórias fortes, com parâmetros
 O sistema deve gerar senhas aleatórias utilizando fonte criptograficamente segura (`secrets`), evitando geradores pseudoaleatórios inadequados para segurança.
 
 ### RF02 - Definição de tamanho da senha
-O usuário deve poder informar o tamanho da senha via argumento/opção de linha de comando (`--length`).
+O usuário deve poder informar o tamanho da senha via argumento de linha de comando (`--length`).
 
 ### RF03 - Valor padrão
 Quando o tamanho não for informado, o sistema deve gerar senha com tamanho padrão de **16 caracteres**.
 
-### RF04 - Validação de tamanho mínimo
-O sistema deve validar o tamanho informado e rejeitar valores menores que **8 caracteres**, retornando erro amigável ao usuário.
+### RF04 - Faixa válida de tamanho
+O sistema deve validar o tamanho informado e aceitar apenas valores entre **8** e **32** caracteres, retornando erro amigável para valores fora dessa faixa.
 
 ### RF05 - Seleção de uso de letras minúsculas
 O usuário deve poder habilitar ou desabilitar o uso de letras minúsculas na composição da senha por meio de opção de linha de comando.
@@ -36,10 +36,10 @@ O usuário deve poder habilitar ou desabilitar o uso de caracteres especiais na 
 O sistema deve validar que ao menos uma classe de caractere esteja habilitada (minúsculas, maiúsculas, números ou especiais), retornando erro claro caso nenhuma classe seja selecionada.
 
 ### RF10 - Compatibilidade entre tamanho e critérios
-Quando houver política que exija presença de classes específicas, o sistema deve validar a compatibilidade entre o tamanho solicitado e os critérios ativos, retornando erro amigável em caso de inviabilidade.
+O sistema deve validar a compatibilidade entre o tamanho solicitado e os critérios ativos, retornando erro amigável em caso de inviabilidade.
 
 ### RF11 - Interface CLI com argparse
-O projeto deve expor uma forma de execução via módulo/entrypoint com `argparse`.
+O projeto deve expor uma forma de execução via módulo/entrypoint com `argparse`, utilizando `src/main.py` como ponto de entrada.
 
 ### RF12 - Saída simples no terminal
 A senha gerada deve ser exibida no `stdout`, em uma única linha, sem informações sensíveis adicionais.
@@ -57,7 +57,7 @@ O código deve seguir boas práticas de legibilidade e manutenção, incluindo:
 
 - aderência à PEP 8
 - uso de `docstrings` em módulos e funções principais
-- organização por responsabilidade (geração, CLI, testes)
+- organização por responsabilidade (core, parser e ponto de entrada)
 
 ### RNF03 - Usabilidade em terminal
 A experiência de uso CLI deve ser direta, com mensagens de ajuda (`--help`) e erros compreensíveis.
@@ -79,7 +79,6 @@ Os itens abaixo **não** fazem parte da primeira entrega:
 - persistência de senhas em arquivo, banco de dados ou cofre
 - criptografia/armazenamento de histórico de senhas
 - integração com serviços externos (APIs, gerenciadores de senha, cloud)
-- políticas avançadas de composição (ex.: mínimo de classes por tipo) configuráveis via múltiplas flags
 - geração de passphrases com dicionário
 - internacionalização (i18n)
 - pipeline completo de CI/CD
@@ -90,17 +89,16 @@ Os itens abaixo **não** fazem parte da primeira entrega:
 O MVP será considerado concluído quando:
 
 1. A geração de senha funcionar via `argparse`.
-2. O parâmetro `--length` for aceito na interface CLI.
+2. O parâmetro `--length` for aceito na faixa de 8 a 32.
 3. O usuário conseguir definir critérios de composição para minúsculas, maiúsculas, números e caracteres especiais.
 4. O valor padrão de 16 caracteres for aplicado quando não houver parâmetro.
-5. Valores inválidos (menores que 8) gerarem erro de validação claro.
-6. Configurações sem nenhuma classe de caractere ativa gerarem erro de validação claro.
-7. Houver ao menos um conjunto inicial de testes automatizados passando localmente.
-8. A documentação básica do projeto estiver disponível (`README` + este escopo).
+5. Configurações sem nenhuma classe de caractere ativa gerarem erro de validação claro.
+6. Houver ao menos um conjunto inicial de testes automatizados passando localmente.
+7. A documentação básica do projeto estiver disponível (`README` + este escopo).
 
 ## 6. Entregáveis
 
 - Código-fonte do MVP em Python 3.10.5
-- CLI funcional com `argparse`
+- CLI funcional com `argparse` (entrypoint em `src/main.py`)
 - Testes iniciais
 - Documento de escopo do MVP (`docs/escopo-mvp.md`)
