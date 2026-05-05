@@ -66,7 +66,7 @@ A experiência de uso CLI deve ser direta, com mensagens de ajuda (`--help`) e e
 O MVP deve executar em ambiente local padrão de desenvolvimento Python, sem dependências complexas de infraestrutura externa.
 
 ### RNF05 - Reprodutibilidade do ambiente
-O projeto deve possuir configuração mínima de empacotamento/dependências e arquivo `.gitignore` adequado para Python, ambiente virtual e caches de teste.
+O projeto deve possuir configuração mínima de empacotamento/dependências, extras de desenvolvimento para testes e arquivo `.gitignore` adequado para Python, ambiente virtual e caches de teste.
 
 ### RNF06 - Segurança básica
 A solução deve evitar práticas inseguras conhecidas para geração de senha, priorizando APIs da biblioteca padrão voltadas à segurança.

@@ -43,6 +43,12 @@ python -m venv .venv
 pip install -e .
 ```
 
+Para instalar também as dependências de desenvolvimento (testes):
+
+```powershell
+pip install -e .[dev]
+```
+
 ### 3. Executar a CLI
 
 ```powershell
@@ -68,7 +74,6 @@ password-gen-argparse --length 20 --upper --number --wildcards
 Com o ambiente virtual ativo:
 
 ```powershell
-pip install pytest
 pytest -q
 ```
 
