@@ -1,99 +1,128 @@
 ﻿# Password Generator
 
-Gerador de senhas seguras em **Python 3.10.5**, com interface de linha de
-comando baseada em `argparse`.
+Gerador de senhas seguras em **Python 3.10.5** com interface CLI em `argparse`.
 
 ## Objetivo
 
-Entregar um MVP para geração de senhas seguras no terminal, priorizando:
-
-- simplicidade de uso em CLI
-- geração com aleatoriedade criptograficamente segura (`secrets`)
-- validação explícita dos parâmetros de entrada
-- base evolutiva para regras de composição configuráveis
+Fornecer uma CLI simples para gerar senhas fortes com validações de entrada,
+permitindo configurar tamanho e classes de caracteres.
 
 ## Stack
 
 - Python 3.10.5
-- `argparse` (CLI)
-- `secrets` e `string` (geração de senha)
-- `pytest` (testes)
-- `setuptools` + `pyproject.toml` (empacotamento)
+- argparse
+- secrets + string
+- pytest
+- setuptools + pyproject.toml
 
-## Estrutura do Projeto
+## Estrutura
 
-- `src/main.py`: ponto de entrada da aplicação.
-- `src/cli_argparse.py`: configuração e validação dos argumentos CLI.
-- `src/generator.py`: core de geração de senha.
-- `tests/test_generator.py`: testes automatizados iniciais.
-- `docs/escopo-mvp.md`: escopo funcional e critérios de aceite do MVP.
+- `src/main.py`: ponto de entrada.
+- `src/cli_argparse.py`: parser e validações da CLI.
+- `src/generator.py`: lógica de geração de senha.
+- `tests/test_generator.py`: testes automatizados.
+- `docs/escopo-mvp.md`: escopo funcional.
 
-## Como Rodar o Projeto
+## Pré-requisitos
 
-### 1. Criar e ativar ambiente virtual
+- Python 3.10.5 no `PATH`
+- `pip` habilitado
+
+Validação rápida:
+
+```powershell
+python --version
+python -m pip --version
+```
+
+## Instalação e Execução
+
+### Windows (recomendado neste projeto)
+
+```powershell
+.\make install
+.\make run
+.\make test
+.\make uninstall
+```
+
+### Linux/macOS
+
+```bash
+make install
+make run
+make test
+make uninstall
+```
+
+### Instalação manual (sem make)
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -e .[dev]
 ```
 
-### 2. Instalar o projeto em modo de desenvolvimento
+## Comandos Disponíveis
 
-```powershell
-pip install -e .
-```
-
-Para instalar também as dependências de desenvolvimento (testes):
-
-```powershell
-pip install -e .[dev]
-```
-
-### 3. Executar a CLI
+### CLI instalada
 
 ```powershell
 password-gen-argparse --length 16
 ```
 
-Parâmetros disponíveis:
+### Execução direta por módulo
 
-- `--length`: tamanho da senha (entre `8` e `32`, padrão: `16`)
-- `--lower` / `--no-lower`: letras minúsculas (padrão: habilitado)
-- `--upper` / `--no-upper`: letras maiúsculas (padrão: desabilitado)
-- `--number` / `--no-number`: números (padrão: desabilitado)
-- `--wildcards` / `--no-wildcards`: caracteres especiais (padrão: desabilitado)
+```powershell
+python src/main.py --length 16
+```
 
-Exemplo com múltiplos critérios:
+### Parâmetros da CLI
+
+- `--length`: tamanho da senha (8 a 32, padrão 16)
+- `--lower` / `--no-lower`: minúsculas (padrão habilitado)
+- `--upper` / `--no-upper`: maiúsculas (padrão desabilitado)
+- `--number` / `--no-number`: números (padrão desabilitado)
+- `--wildcards` / `--no-wildcards`: especiais (padrão desabilitado)
+
+Exemplo:
 
 ```powershell
 password-gen-argparse --length 20 --upper --number --wildcards
 ```
 
-## Como Rodar os Testes
+Exemplo de saída:
 
-Com o ambiente virtual ativo:
-
-```powershell
-pytest -q
+```text
+bkaGsjZVX8Ft9VOFt9QL
 ```
 
-## Roadmap de Releases
+## Targets do Makefile
 
-Roadmap baseado nos requisitos definidos em `docs/escopo-mvp.md`.
+- `install`: cria/atualiza `.venv` e instala `.[dev]`
+- `run`: executa `src/main.py --length 16`
+- `test`: executa `pytest -q`
+- `uninstall`: remove o pacote `password-generator` do `.venv`
 
-### v0.1.0 - Base do MVP
+## Erros Esperados
 
-- geração de senha segura com `secrets`
-- parâmetro `--length` com valor padrão 16 e faixa de 8 a 32
-- estrutura inicial de testes
+- `--length` fora da faixa (ex.: 7 ou 33):
+  - `O valor de --length deve estar entre 8 e 32.`
+- nenhuma classe ativa (`--no-lower --no-upper --no-number --no-wildcards`):
+  - `Selecione ao menos uma classe de caractere.`
+- tipo inválido em `--length` (ex.: `abc`):
+  - `O valor de --length deve ser um numero inteiro.`
 
-### v0.2.0 - Critérios de Composição na CLI
+## Validação Rápida do Projeto
 
-- opções para habilitar/desabilitar minúsculas, maiúsculas, números e especiais
-- validação para impedir execução sem classes de caractere ativas
+```powershell
+.\make install
+.\make test
+.\make run
+```
 
-### v0.3.0 - Regras de Consistência e Qualidade
+Resultado esperado dos testes:
 
-- validação de compatibilidade entre tamanho e critérios ativos
-- ampliação da suíte de testes para cobrir combinações de critérios
-- melhoria de mensagens de erro e ajuda da CLI
+```text
+11 passed
+```
