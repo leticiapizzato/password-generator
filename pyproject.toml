@@ -1,4 +1,4 @@
-﻿[build-system]
+[build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -9,6 +9,9 @@ description = "Gerador de senhas seguras com interface CLI em argparse."
 readme = "README.md"
 requires-python = ">=3.10.5"
 dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=9.0.0"]
 
 [project.scripts]
 password-gen-argparse = "main:main"

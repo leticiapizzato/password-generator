@@ -37,6 +37,7 @@ htmlcov/
 .env
 .env.*
 *.local
+.python-version
 
 # OS generated files
 .DS_Store
