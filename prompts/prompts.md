@@ -141,28 +141,46 @@ Pode deixar de fora o diretório tests.
 Lembre-se de enviar para o servidor (push).
 ```
 
-#### Prompt 14 - 
+#### Prompt 18 - Testes e validações
 ```powershell
-Contexto: Revisão das documentações
-Objetivo: Revisão dos documentos criados, para manter coerencia com o implmentado.
-Estilo: Respeitar PEP8, código limpo simples e claro.
-Resposta: Ajustar documentos README, pyproject.toml, .gitignore, docs/escopo-mvp.md
-
- Teste 1 (regra mínima): deve falhar com ValueError quando length < 8.
-
- Teste 2 (nenhuma classe ativa): deve falhar com ValueError quando upper=False, lower=False, number=False, wildcards=False.
-
- Teste 3 (tamanho correto): deve retornar senha com tamanho exato para combinações válidas (ex.: length=16).
-
- Teste 4 (classes obrigatórias presentes): quando múltiplas classes estão ativas, senha deve conter ao menos 1 char de cada classe ativa.
-
- Teste 5 (integração CLI): executar main/CLI com argumentos e validar saída (sucesso) e erro amigável (falha), incluindo código de retorno.
+Contexto: Testes e validações do projeto
+Objetivo: Gerar suite de testes, utilizando Pytest considerando: 1 - regras mínimas (exemplo length < 8), 2 - regras máximas (exemplo length > 32), 3 - nenhuma classe ativa (no-upper, no-lower, no-wildcards, no-number), 4 - validação do tamanho coerente com o lenght passado, 5 - se as classes obrigátorias tem ao menos 1 caracter cada na senha gerada, 6 - testes de integração com a cli;
+Estilo: Código limpo, simples e claro
+Resposta: Ajustar arquivo de testes em tests/test_generator.py
 ```
 
+#### Prompt 18 - Testes e validações
+```powershell
+Contexto: Testes e validações do projeto
+Objetivo: Gerar suite de testes, utilizando Pytest considerando: 1 - regras mínimas (exemplo length < 8), 2 - regras máximas (exemplo length > 32), 3 - nenhuma classe ativa (no-upper, no-lower, no-wildcards, no-number), 4 - validação do tamanho coerente com o lenght passado, 5 - se as classes obrigátorias tem ao menos 1 caracter cada na senha gerada, 6 - testes de integração com a cli;
+Estilo: Código limpo, simples e claro
+Resposta: Ajustar arquivo de testes em tests/test_generator.py
+```
 
+#### Prompt 19 - Coerência do ambiente
+```powershell
+Faça os ajustes necessários no projeto e no ambiente para garantir que tanto o projeto quanto os testes possam ser executados com sucesso.
+```
 
-camada de testes
-revisão critica de coerencia dos requisitos funcionais
-revisão critica dos testes implementados
-validação dos testes
-validação de execução
+#### Prompt 20 - Verificação crítica
+```powershell
+Com base no código e testes atuais, gere um checklist:
+1 - Os requisitos funcionais estão sendo atendidos?
+2 - Tem algum GAP na corbertura dos testes?
+3 - Sugira melhorias prioritárias para a próxima release.
+Resposta em bullets curtos.
+```
+
+#### Prompt 21 - Revisão de documentações - v2
+```powershell
+Contexto: Revisão das documentações
+Objetivo: Revisão dos documentos criados, para manter coerencia com o ambiente atual e o código implmentado.
+Estilo: Respeitar PEP8, código limpo simples e claro.
+Resposta: Ajustar documentos README, pyproject.toml, .gitignore, docs/escopo-mvp.md
+```
+
+#### Prompt 22 - Commits
+```powershell
+Existem várias alterações no meu repositório.
+Faça commits separados por módulos, considerando o padrão Conventional commits para cada um.
+```
