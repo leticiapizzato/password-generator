@@ -6,7 +6,7 @@
 | **Contexto acadêmico** | UFG — C10 (Engenharia de Requisitos com GenAI) |
 | **Documento** | Casos de uso expandidos |
 | **Data** | 2026-08-04 |
-| **Versão do documento** | 1.0 |
+| **Versão do documento** | 2.0 (atualizado após a implementação dos ajustes) |
 | **Base** | `requisitos/analise-elicitacao.md`, `requisitos/historias-usuario.md` |
 
 ## 1. Por que caso de uso *além* de história de usuário
@@ -58,7 +58,7 @@ flowchart LR
 | **Gatilho** | O usuário executa o comando no terminal |
 | **Frequência estimada** | Esporádica e interativa (várias vezes ao dia, sob demanda) |
 | **Histórias relacionadas** | US01, US02, US03, US04, US06 |
-| **Regras associadas** | RN01–RN10 |
+| **Regras associadas** | RN01–RN10, exceto RN05 (removida) |
 
 ### Fluxo principal (caminho de sucesso)
 
@@ -66,9 +66,9 @@ flowchart LR
 |---|------|---------|
 | 1 | Executa `password-gen-argparse` com zero ou mais parâmetros | |
 | 2 | | Interpreta os argumentos e aplica os padrões ausentes (RN01, RN09) |
-| 3 | | Valida o tipo e a faixa de `--length` (RN02) |
-| 4 | | Valida que há ao menos uma classe ativa (RN03) |
-| 5 | | Valida a compatibilidade entre tamanho e nº de classes (RN05) |
+| 3 | | Converte `--length` para inteiro (argparse) |
+| 4 | | Valida a faixa de tamanho, no core, como fonte única (RN02) |
+| 5 | | Valida que há ao menos uma classe ativa (RN03) |
 | 6 | | Monta o alfabeto a partir das classes ativas (RN06) |
 | 7 | | Sorteia **um caractere de cada classe ativa** para garantir representatividade (RN04) |
 | 8 | | Sorteia os caracteres restantes no alfabeto completo, via CSPRNG (RN07) |
@@ -81,36 +81,41 @@ flowchart LR
 > sem nenhum dígito e ser rejeitada pelo formulário de destino — exatamente o problema que o usuário
 > tentava evitar ao ligar a opção.
 
+> **Observação sobre os passos 3 e 4:** originalmente a faixa de tamanho era validada **duas vezes**, na
+> CLI e no core, com mensagens diferentes (risco **R08**). A validação passou a viver apenas no core; a
+> CLI só faz a conversão de tipo. Por isso o antigo passo de "compatibilidade entre tamanho e nº de
+> classes" desapareceu: era o RF10, removido por ser inalcançável.
+
 ### Fluxos alternativos
 
 **FA01 — Usuário aceita todos os padrões**
 Ocorre no passo 1, quando nenhum argumento é informado.
-O sistema aplica tamanho 16 e **apenas minúsculas** (RN01, RN09) e segue do passo 3.
-⚠️ **Pendente de decisão** — ver `requisitos/analise-elicitacao.md`, seção 9, item 1.
+O sistema aplica tamanho 16 e **as quatro classes de caractere** (RN01, RN09) e segue do passo 4.
 
-**FA02 — Usuário desabilita a classe padrão**
-Ocorre no passo 1, com `--no-lower` combinado a pelo menos outra classe ativa.
-O sistema remove minúsculas do alfabeto e segue normalmente. A senha **não conterá** minúsculas.
+**FA02 — Usuário desabilita uma classe**
+Ocorre no passo 1, com `--no-wildcards` (ou equivalente), mantendo ao menos uma classe ativa.
+O sistema remove a classe do alfabeto e segue normalmente. A senha **não conterá** aquela classe.
+Uso típico: sistemas de destino que rejeitam símbolos.
 
 ### Fluxos de exceção
 
 | ID | Condição | Passo | Resposta do sistema | Código |
 |----|----------|-------|---------------------|--------|
 | **FE01** | `--length` não conversível para inteiro | 3 | `usage` + `argument --length: O valor de --length deve ser um numero inteiro.` em `stderr` | 2 |
-| **FE02** | `--length` fora de 8..32 | 3 | `usage` + `argument --length: O valor de --length deve estar entre 8 e 32.` em `stderr` | 2 |
-| **FE03** | Nenhuma classe de caractere ativa | 4 | `usage` + `Selecione ao menos uma classe de caractere.` em `stderr` | 2 |
-| **FE04** | Tamanho menor que o nº de classes ativas | 5 | `O tamanho da senha deve ser maior ou igual ao numero de classes ativas.` | 2 |
+| **FE02** | `--length` fora de 8..32 | 4 | `usage` + `O tamanho da senha deve estar entre 8 e 32.` em `stderr` | 2 |
+| **FE03** | Nenhuma classe de caractere ativa | 5 | `usage` + `Selecione ao menos uma classe de caractere.` em `stderr` | 2 |
 
-> **FE04 é inatingível — por qualquer caminho.** Não se trata apenas de a CLI barrar antes: a própria
-> função `generate_password()` valida `length ≥ 8` **antes** de contar as classes, e há no máximo 4
-> classes. Logo `length < nº de classes` é sempre falsa, mesmo chamando o core diretamente como
-> biblioteca. Uma varredura exaustiva confirmou que nenhuma combinação de entrada alcança essa
-> validação (ver `requisitos/analise-elicitacao.md`, seção 7.1).
+> **O antigo FE04 foi removido.** Ele previa erro quando o tamanho fosse menor que o número de classes
+> ativas. A tentativa de reproduzi-lo durante a elaboração do protótipo revelou que era **inatingível por
+> qualquer caminho**: `generate_password()` valida `length ≥ 8` antes de contar as classes, e há no
+> máximo 4. Uma varredura exaustiva confirmou que nenhuma combinação de entrada alcançava a validação.
+> O requisito **RF10** e a regra **RN05** foram removidos, junto com o código correspondente.
 >
-> **FE04 permanece documentado aqui como fluxo especificado, mas está sinalizado como não realizável no
-> produto atual.** Sua permanência depende da decisão pendente nº 5 da análise. O caso ilustra bem por
-> que a especificação foi confrontada com execução real: pelo documento de elicitação, o RF10 parecia um
-> requisito implementado e testado.
+> O caso ilustra por que a especificação foi confrontada com execução real: pelo documento de elicitação,
+> o RF10 parecia um requisito implementado e testado.
+>
+> Note também que **FE02 mudou de mensagem e de passo**: antes era barrado pelo argparse no passo 3, com
+> texto próprio; agora é validado no core, com mensagem única.
 
 ### Requisitos especiais
 
@@ -147,9 +152,10 @@ O sistema remove minúsculas do alfabeto e segue normalmente. A senha **não con
 Nenhum. `--help` é tratado pelo `argparse` antes de qualquer validação e não pode falhar por
 configuração do usuário.
 
-> **Nota de usabilidade:** o texto de ajuda atual **repete o valor padrão** — a descrição escrita à mão
-> diz "(padrao: desabilitado)" e o `argparse` acrescenta automaticamente "(default: False)". A duplicação
-> é visível na saída real (ver `requisitos/prototipo-cli.md`) e é candidata a ajuste de RNF03.
+> **Nota de usabilidade — resolvida.** O texto de ajuda repetia o valor padrão ("(padrao: desabilitado)"
+> escrito à mão junto do "(default: False)" inserido pelo `argparse`) e o `usage` exibia `main.py` em vez
+> do nome real do comando. Ambos foram corrigidos, e a ajuda passou a enumerar o conjunto de caracteres
+> especiais. A saída atual está em `requisitos/prototipo-cli.md`, seção 2.
 
 ---
 

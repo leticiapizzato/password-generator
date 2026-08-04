@@ -6,7 +6,7 @@
 | **Contexto acadêmico** | UFG — C10 (Engenharia de Requisitos com GenAI) |
 | **Documento** | Análise crítica da elicitação: requisitos, regras de negócio, RNFs, lacunas e ambiguidades |
 | **Data** | 2026-08-04 |
-| **Versão do documento** | 1.0 |
+| **Versão do documento** | 2.0 (atualizado após a implementação dos ajustes) |
 | **Documento-fonte analisado** | `docs/escopo-mvp.md` (produto da etapa de elicitação) |
 | **Evidências complementares** | `src/generator.py`, `src/cli_argparse.py`, `src/main.py`, `tests/test_generator.py`, `README.md`, execução real da CLI |
 
@@ -56,7 +56,7 @@ original, para preservar rastreabilidade.
 | RF07 | Habilitar/desabilitar números | Implementado (`--number/--no-number`) |
 | RF08 | Habilitar/desabilitar caracteres especiais | Implementado (`--wildcards/--no-wildcards`) |
 | RF09 | Validar que ao menos uma classe esteja ativa | Implementado |
-| RF10 | Validar compatibilidade entre tamanho e critérios | Implementado, porém **código morto** — inalcançável por qualquer entrada (ver A03) |
+| ~~RF10~~ | ~~Validar compatibilidade entre tamanho e critérios~~ | **Removido** — era código morto, inalcançável por qualquer entrada (ver 7.1) |
 | RF11 | Expor entrypoint CLI com `argparse` | Implementado (`src/main.py`) |
 | RF12 | Exibir a senha em `stdout`, em uma linha | Implementado |
 | RF13 | Manter testes automatizados | Implementado (11 testes) |
@@ -83,19 +83,23 @@ resultado desta seção: cinco das dez regras que governam o produto **não esta
 | RN02 | O tamanho deve estar entre **8 e 32**, limites **inclusivos** | Sim (RF04) | `cli_argparse.py:27` |
 | RN03 | Ao menos **uma** classe de caractere deve estar ativa | Sim (RF09) | `generator.py:53` |
 | RN04 | A senha deve conter **ao menos um caractere de cada classe ativa** | **Não** | `generator.py:62` |
-| RN05 | O tamanho deve ser **≥ ao número de classes ativas** | Parcial (RF10, vago) | `generator.py:56` — **nunca executada** (ver A03) |
+| ~~RN05~~ | ~~O tamanho deve ser **≥ ao número de classes ativas**~~ | — | **Removida** junto com o RF10 (ver 7.1) |
 | RN06 | Alfabetos: `a–z`, `A–Z`, `0–9` e os **32 símbolos** de `string.punctuation` (`` !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ ``) | **Não** | `generator.py:44-51` |
 | RN07 | A aleatoriedade deve vir de **CSPRNG** (`secrets`), nunca de `random` | Sim (RF01/RNF06) | `generator.py:62-68` |
 | RN08 | A aplicação **não persiste** a senha em arquivo, banco ou log | Parcial (só como "fora de escopo") | Ausência de I/O em `src/` |
-| RN09 | A composição **padrão** ativa **apenas minúsculas** | **Não** | `cli_argparse.py:45-67` |
+| RN09 | A composição **padrão** ativa **as quatro classes** | **Não** (era omissa; decidida nesta análise) | `cli_argparse.py` + assinatura de `generate_password` |
 | RN10 | Sucesso → senha em `stdout` + saída 0; erro → mensagem em `stderr` + saída 2 | **Não** | Execução real |
 
-> **RN09 é o achado mais relevante da análise.** O documento de elicitação promete "senhas fortes" logo
-> no objetivo, mas nunca especifica a composição padrão. A implementação decidiu por *apenas minúsculas*,
-> e o resultado é que `password-gen-argparse` **sem argumentos** produz algo como `iborqgmdotcairsw` —
-> 16 caracteres de um alfabeto de 26 símbolos (≈75 bits), quando as quatro classes dariam ≈100 bits.
-> Não é um defeito de código: é uma **decisão de negócio tomada por omissão do requisito**. Este achado
-> converge com o risco **R03** já registrado em `riscos/identificacao.md`.
+> **RN09 foi o achado mais relevante da análise — e já está resolvido.** O documento de elicitação
+> prometia "senhas fortes" logo no objetivo, mas nunca especificava a composição padrão. A implementação
+> havia decidido por *apenas minúsculas*, e `password-gen-argparse` **sem argumentos** produzia algo como
+> `iborqgmdotcairsw` — 16 caracteres de um alfabeto de 26 símbolos (≈75 bits). Não era defeito de código:
+> era uma **decisão de negócio tomada por omissão do requisito**.
+>
+> Após validação com o solicitante, o padrão passou a ativar **as quatro classes** (≈105 bits para 16
+> caracteres). A justificativa: numa ferramenta de segurança o padrão deve ser a opção mais forte, e
+> reduzir a composição passa a ser escolha explícita do usuário. Com isso, a causa do risco **R03**
+> deixa de existir.
 
 ## 5. Requisitos não funcionais
 
@@ -151,7 +155,7 @@ Itens **presentes**, mas abertos a mais de uma leitura:
 |----|-------------|--------------------|--------------------|
 | A01 | RNF01: "deve ser desenvolvido em **Python 3.10.5**" | (a) exatamente 3.10.5; (b) 3.10.5 ou superior | `pyproject.toml` já adota `>=3.10.5`. Adotar (b) e corrigir o texto |
 | A02 | "erro **amigável**" (RF04, RF10), "mensagens **compreensíveis**" (RNF03) | Subjetivo; sem formato, canal ou idioma definidos | Substituir por RN10 + critérios em Gherkin com a mensagem exata |
-| A03 | RF10: "**inviabilidade**" entre tamanho e critérios | (a) `length < nº de classes`; (b) tamanho insuficiente para representar todas as classes com folga | A implementação escolheu (a) — e essa leitura torna o requisito **inócuo**: como `length ≥ 8` é validado antes e há no máximo 4 classes, a condição nunca é verdadeira. Ver 7.1 |
+| A03 | RF10: "**inviabilidade**" entre tamanho e critérios | (a) `length < nº de classes`; (b) tamanho insuficiente para representar todas as classes com folga | ✅ **Resolvida por remoção.** A leitura (a) tornava o requisito inócuo: com `length ≥ 8` validado antes e no máximo 4 classes, a condição nunca era verdadeira. RF10 e RN05 foram removidos. Ver 7.1 |
 | A04 | RF12: "sem informações **sensíveis adicionais**" | A própria senha é sensível; o que exatamente é vedado? | Reescrever: "a saída deve conter exclusivamente a senha, sem prefixo, rótulo ou eco dos parâmetros" |
 | A05 | RF13: "estrutura **mínima** de testes" | Sem meta de cobertura | Substituir por RNF09 (≥ 90%) |
 | A06 | RF02 não menciona limites; a faixa só aparece em RF04 | Leitura isolada de RF02 sugere tamanho livre | Referenciar RN02 dentro do RF02 |
@@ -191,14 +195,25 @@ Com `length=3`, a exceção efetivamente levantada é `"O tamanho minimo recomen
 qualquer `ValueError` e o teste fica **verde testando outro requisito**. RF10 aparece como coberto na
 suíte, mas não está.
 
-**Encaminhamento (depende da decisão pendente nº 5):**
+### 7.2 Encaminhamento aplicado
 
-- Se o core **não** é produto de biblioteca: remover a validação e o RF10, e corrigir o teste.
-- Se **é** produto de biblioteca: mover a validação de faixa (8..32) para o core como responsabilidade
-  única (resolvendo também o risco **R08**), e reescrever o teste com `match=` para fixar a mensagem.
+O achado foi corrigido em dois commits, deliberadamente nessa ordem:
 
-Em qualquer cenário, **todo `pytest.raises` da suíte deveria usar `match=`** — sem isso, testes de
-exceção não distinguem qual regra falhou.
+1. **Expor antes de corrigir.** O `match=` foi adicionado ao teste, que passou a falhar. Para manter a
+   CI verde sem esconder o defeito, o teste foi marcado com `@pytest.mark.xfail(strict=True)` e uma
+   referência a esta seção. O `strict=True` importa: se a regra voltar a ser alcançável, o teste falha
+   por *passar inesperadamente*. O defeito ficou registrado no código, não só na documentação.
+2. **Corrigir a causa.** A faixa 8..32 passou a viver em `MIN_LENGTH`/`MAX_LENGTH` no gerador, com a CLI
+   importando as constantes em vez de repeti-las — o que resolve também o risco **R08** (validação e
+   mensagens duplicadas entre camadas). A validação inalcançável foi removida, junto com o teste
+   marcado como `xfail` e com os requisitos RF10/RN05.
+
+Efeito colateral positivo: a mensagem de erro de faixa passou a ser **única**. Antes, a mesma regra
+produzia "O valor de --length deve estar entre 8 e 32." pela CLI e "O tamanho minimo recomendado e 8
+caracteres." pelo core.
+
+Todos os `pytest.raises` da suíte usam `match=` — sem isso, testes de exceção não distinguem qual regra
+falhou, que foi exatamente como o defeito passou despercebido.
 
 ## 8. Consequência para a escolha dos artefatos
 
@@ -216,33 +231,44 @@ A05, A07). Isso direciona a especificação para artefatos **orientados a crité
 
 A justificativa completa da escolha está em `requisitos/rastreabilidade.md`, seção 1.
 
-## 9. Decisões pendentes de validação
+## 9. Decisões
 
-Perguntas que a análise **não pode responder sozinha** — dependem do solicitante:
+### 9.1 Decisões tomadas
 
-1. A composição padrão deve permanecer "apenas minúsculas" (RN09) ou passar a ativar as quatro classes?
-2. Existe entropia mínima aceitável para o produto (L01)? Qual referência normativa adotar?
-3. Há sistemas-alvo que restringem caracteres especiais (L03)? Se sim, quais símbolos excluir?
-4. A regra de representatividade (RN04) é desejada? Ela **reduz** ligeiramente o espaço de busca em
+| # | Questão | Decisão |
+|---|---------|---------|
+| 1 | Composição padrão (RN09/L02) | ✅ **Ativar as quatro classes.** Numa ferramenta de segurança o padrão deve ser a opção mais forte; reduzir a composição vira escolha explícita |
+| 5 | O core é produto de biblioteca? (RF10/RN05) | ✅ **Não.** É detalhe interno da CLI. Por isso a validação foi centralizada no core como fonte única, e a regra inalcançável foi removida |
+
+### 9.2 Decisões ainda pendentes
+
+Dependem do solicitante e **não** bloqueiam a v1.0.0:
+
+1. Existe entropia mínima aceitável para o produto (L01)? Qual referência normativa adotar?
+2. Há sistemas-alvo que restringem caracteres especiais (L03)? Se sim, quais símbolos excluir?
+3. A regra de representatividade (RN04) é desejada? Ela **reduz** ligeiramente o espaço de busca em
    troca de garantir a aceitação da senha por validadores de formulário.
-5. O core (`generate_password`) é um produto de biblioteca, ou apenas detalhe interno da CLI? A resposta
-   define se RF10/RN05 têm valor ou devem ser removidos.
-6. Geração em lote (L07) entra na v1.1?
-7. As mensagens devem passar a usar acentuação correta (L12)?
+4. Geração em lote (L07) entra na v1.1?
+5. As mensagens devem passar a usar acentuação correta (L12)?
 
 ## 10. Resumo
 
 | Categoria | Quantidade |
 |-----------|-----------|
-| Requisitos funcionais originais | 13 (RF01–RF13) |
+| Requisitos funcionais originais | 13 (RF01–RF13), sendo **RF10 removido** → 12 vigentes |
 | Requisitos funcionais derivados | 3 (RF14–RF16) |
-| Regras de negócio | 10 (RN01–RN10) — **5 não documentadas** |
+| Regras de negócio | 10 (RN01–RN10), sendo **RN05 removida** → 9 vigentes; **5 não estavam documentadas** |
 | RNFs originais | 6 (RNF01–RNF06) — **apenas 1 plenamente verificável** |
 | RNFs propostos | 6 (RNF07–RNF12) |
 | Lacunas | 12 (L01–L12) |
 | Ambiguidades | 8 (A01–A08) |
 
-O documento de elicitação cumpre bem o papel de **delimitar escopo**, mas não serve como base de
-aceitação: metade das regras que governam o produto não estava escrita, e a maioria dos RNFs não é
-testável. As lacunas de maior severidade são **L01, L02 e L11** — todas relacionadas à mesma causa raiz:
-o termo "senha forte" foi tratado como autoexplicativo e nunca foi convertido em critério.
+O documento de elicitação cumpria bem o papel de **delimitar escopo**, mas não servia como base de
+aceitação: metade das regras que governam o produto não estava escrita, e a maioria dos RNFs não era
+testável. As lacunas de maior severidade eram **L01, L02 e L11** — todas ligadas à mesma causa raiz: o
+termo "senha forte" foi tratado como autoexplicativo e nunca convertido em critério.
+
+**Situação após os ajustes:** L02 foi fechada pela decisão de composição padrão; L03, L05 e L11 foram
+fechadas pela documentação das regras e pelos critérios de aceite agora testados; A03 foi resolvida pela
+remoção do RF10. Permanecem abertas L01 (limiar de entropia), L07 e L08 (backlog v1.1) — nenhuma
+bloqueante para a v1.0.0.

@@ -6,7 +6,7 @@
 | **Contexto acadêmico** | UFG — C10 (Engenharia de Requisitos com GenAI) |
 | **Documento** | Histórias de usuário com critérios de aceite em Gherkin |
 | **Data** | 2026-08-04 |
-| **Versão do documento** | 1.0 |
+| **Versão do documento** | 2.0 (critérios atualizados após a implementação dos ajustes) |
 | **Base** | `requisitos/analise-elicitacao.md` |
 
 ## 1. Ator
@@ -46,30 +46,31 @@ Cenário: Geração com todos os padrões
   Dado que a CLI está instalada
   Quando eu executo "password-gen-argparse" sem argumentos
   Então uma senha de 16 caracteres é exibida em stdout
+  E a senha contém as quatro classes de caractere
   E a saída contém exatamente uma linha
   E o código de saída é 0
 ```
-✅ `test_cli_integration_success`, `test_cli_parser_defaults`
+✅ `test_cli_success_contract`, `test_cli_parser_defaults`
 
 ```gherkin
 Cenário: A saída contém apenas a senha
   Quando eu executo "password-gen-argparse" sem argumentos
   Então a saída não contém rótulos, prefixos nem eco dos parâmetros
+  E stderr permanece vazio
   E a saída pode ser copiada e usada diretamente como senha
 ```
-⚠️ resolve a ambiguidade **A04**
+✅ `test_cli_success_contract` — resolve a ambiguidade **A04**
 
 ```gherkin
 Cenário: Duas execuções não produzem a mesma senha
   Quando eu executo "password-gen-argparse" duas vezes seguidas
   Então as duas senhas geradas são diferentes
 ```
-❌ lacuna de teste — corresponde ao risco **R07**
+✅ `test_generated_passwords_do_not_collide` (1000 amostras) — fecha o risco **R07**
 
-> **⚠️ Ponto em aberto (RN09 / L02):** hoje este cenário produz uma senha **apenas com minúsculas**
-> (ex.: `iborqgmdotcairsw`). Se a decisão pendente nº 1 da análise for "ativar as quatro classes por
-> padrão", os critérios desta história mudam. **A história não deve ser considerada aceita até que essa
-> decisão seja tomada.**
+> **✅ Decisão tomada (RN09 / L02).** Este cenário produzia antes uma senha **apenas com minúsculas**
+> (`iborqgmdotcairsw`, ≈75 bits). Após validação com o solicitante, o padrão passou a ativar **as quatro
+> classes** (≈105 bits). A história está aceita.
 
 ---
 
@@ -102,12 +103,12 @@ Esquema do Cenário: Limites da faixa são aceitos
     | 8       |
     | 32      |
 ```
-⚠️ os limites **inclusivos** (RN02) não têm teste dedicado
+✅ `test_generate_password_accepts_inclusive_bounds` (parametrizado em 8 e 32)
 
 ```gherkin
 Esquema do Cenário: Tamanho fora da faixa é rejeitado
   Quando eu executo "password-gen-argparse --length <tamanho>"
-  Então a mensagem "O valor de --length deve estar entre 8 e 32." é exibida em stderr
+  Então a mensagem "O tamanho da senha deve estar entre 8 e 32." é exibida em stderr
   E o código de saída é 2
 
   Exemplos:
@@ -115,7 +116,7 @@ Esquema do Cenário: Tamanho fora da faixa é rejeitado
     | 7       |
     | 33      |
 ```
-✅ `test_cli_integration_error_for_invalid_length` (cobre 33)
+✅ `test_cli_error_contract` (cobre 7 e 33) — mensagem unificada entre CLI e core
 
 ```gherkin
 Cenário: Tamanho não numérico é rejeitado
@@ -123,7 +124,7 @@ Cenário: Tamanho não numérico é rejeitado
   Então a mensagem "O valor de --length deve ser um numero inteiro." é exibida em stderr
   E o código de saída é 2
 ```
-⚠️ coberto no core (`test_generate_password_fails_for_invalid_length_type`), não na CLI
+✅ `test_cli_error_contract` (caso `--length abc`) e no core
 
 ---
 
@@ -154,7 +155,7 @@ Cenário: Classe desligada não aparece na senha
   E contém ao menos uma letra maiúscula
   E contém ao menos um dígito
 ```
-❌ sem teste
+✅ `test_disabled_class_is_absent_from_password`
 
 ```gherkin
 Cenário: Conjunto de caracteres especiais é o previsto
@@ -162,7 +163,7 @@ Cenário: Conjunto de caracteres especiais é o previsto
   Quando uma senha é gerada
   Então todo caractere especial pertence ao conjunto !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 ```
-❌ sem teste — formaliza **RN06** (lacuna **L03**)
+✅ `test_special_characters_belong_to_expected_set` — formaliza **RN06** (lacuna **L03**)
 
 ---
 
@@ -183,7 +184,7 @@ Cenário: Nenhuma classe de caractere selecionada
   E nenhuma senha é exibida em stdout
   E o código de saída é 2
 ```
-✅ `test_generate_password_fails_when_no_class_is_active` (core) · ⚠️ sem teste na CLI
+✅ `test_generate_password_fails_when_no_class_is_active` (core) e `test_cli_error_contract` (CLI)
 
 ```gherkin
 Cenário: Erros vão para stderr e não poluem stdout
@@ -193,7 +194,7 @@ Cenário: Erros vão para stderr e não poluem stdout
   E a mensagem de erro é escrita em stderr
   E o código de saída é 2
 ```
-⚠️ formaliza **RN10** (lacuna **L05**) — comportamento verificado manualmente, sem teste
+✅ `test_cli_error_contract` e `test_cli_success_contract` — formaliza **RN10** (lacuna **L05**)
 
 ```gherkin
 Cenário: A mensagem de erro indica o parâmetro problemático
@@ -201,7 +202,7 @@ Cenário: A mensagem de erro indica o parâmetro problemático
   Então a mensagem de erro cita "--length"
   E a linha de uso (usage) é exibida junto
 ```
-⚠️ resolve a ambiguidade **A02** ("erro amigável")
+✅ `test_cli_error_contract` — resolve a ambiguidade **A02** ("erro amigável")
 
 ---
 
@@ -222,7 +223,7 @@ Cenário: Ajuda lista todos os parâmetros
   E cada parâmetro exibe seu valor padrão
   E o código de saída é 0
 ```
-❌ sem teste
+✅ `test_cli_help_lists_all_parameters`
 
 ```gherkin
 Cenário: Ajuda informa a faixa válida de tamanho
@@ -230,7 +231,7 @@ Cenário: Ajuda informa a faixa válida de tamanho
   Então a descrição de --length informa a faixa "entre 8 e 32"
   E informa o padrão 16
 ```
-❌ sem teste — mitiga a ambiguidade **A06**
+✅ `test_cli_help_documents_length_range` — mitiga a ambiguidade **A06**
 
 ---
 
@@ -251,7 +252,7 @@ Cenário: A geração usa CSPRNG
   Então a aleatoriedade provém do módulo "secrets"
   E o módulo "random" não é utilizado para escolher caracteres
 ```
-❌ sem teste — corresponde diretamente ao risco **R01**
+✅ `test_generate_password_uses_secrets_module` e `test_generator_does_not_import_insecure_random` — fecha o risco **R01**
 
 ```gherkin
 Cenário: A aplicação não persiste o segredo
@@ -259,14 +260,14 @@ Cenário: A aplicação não persiste o segredo
   Então nenhum arquivo é criado ou modificado pela aplicação
   E nenhuma requisição de rede é realizada
 ```
-❌ sem teste — formaliza **RN08** e **RNF08/RNF12** (lacuna **L10**)
+❌ sem teste — formaliza **RN08** e **RNF08/RNF12** (lacuna **L10**). Único critério ainda não verificado
 
 ```gherkin
 Cenário: Senhas geradas não colidem
   Quando eu gero 1000 senhas de 16 caracteres com as quatro classes ativas
   Então todas as 1000 senhas são distintas
 ```
-❌ sem teste — corresponde ao risco **R07**
+✅ `test_generated_passwords_do_not_collide` — fecha o risco **R07**
 
 ---
 
@@ -285,10 +286,14 @@ comprometidas no MVP:
 
 | Status | Critérios | Observação |
 |--------|-----------|-----------|
-| ✅ Coberto por teste | 5 | Faixa de tamanho, classes ativas, padrões, integração CLI |
-| ⚠️ Implementado sem teste | 6 | Sobretudo o contrato de saída (RN10) e limites inclusivos |
-| ❌ Não implementado / sem teste | 8 | Concentrados em US05 e US06 (ajuda e garantias de segurança) |
+| ✅ Coberto por teste | 18 | Todas as histórias US01–US05, e 2 dos 3 critérios de US06 |
+| ❌ Sem teste | 1 | "A aplicação não persiste o segredo" (US06) |
 
-O agrupamento revela onde está a dívida: **as garantias de segurança (US06) são as menos verificadas**,
-apesar de serem a razão de existir do produto. Essa é a mesma conclusão a que a gestão de riscos chegou
-por outro caminho (R01, R07), o que reforça a prioridade.
+Na versão 1.0 deste documento o quadro era 5 cobertos, 6 implementados sem teste e 8 sem teste — com a
+dívida concentrada justamente em **US06**, as garantias de segurança, que são a razão de existir do
+produto. A suíte passou de 11 para **24 testes** e essa inversão de prioridade foi corrigida: os riscos
+**R01** (regressão do CSPRNG) e **R07** (unicidade) agora têm teste dedicado.
+
+Permanece descoberto um único critério — "nenhum arquivo é criado e nenhuma requisição de rede é
+realizada". Verificá-lo exigiria instrumentar o sistema de arquivos e a rede no processo de teste, custo
+desproporcional para o MVP. Fica registrado como dívida consciente, não como esquecimento.
