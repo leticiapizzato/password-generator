@@ -23,6 +23,23 @@ permitindo configurar tamanho e classes de caracteres.
 - `tests/test_generator.py`: testes automatizados.
 - `docs/escopo-mvp.md`: escopo funcional.
 
+## Documentação
+
+### Engenharia de requisitos (`requisitos/`)
+
+- `requisitos/analise-elicitacao.md`: análise crítica da elicitação — requisitos, regras de negócio,
+  RNFs, lacunas e ambiguidades.
+- `requisitos/historias-usuario.md`: histórias de usuário com critérios de aceite em Gherkin.
+- `requisitos/casos-de-uso.md`: casos de uso expandidos, com fluxos alternativos e de exceção.
+- `requisitos/prototipo-cli.md`: protótipo de interface (transcrições reais de terminal).
+- `requisitos/rastreabilidade.md`: justificativa dos artefatos e matriz de rastreabilidade.
+
+### Gestão do projeto
+
+- `riscos/`: identificação, análise e respostas aos riscos.
+- `comunicacao/stakeholders.md`: comunicado de atualização do projeto.
+- `docs/release.md`: checklist de release v1.0.0.
+
 ## Pré-requisitos
 
 - Python 3.10.5 no `PATH`
