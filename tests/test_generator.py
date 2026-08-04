@@ -77,9 +77,9 @@ def test_cli_parser_defaults() -> None:
 
     assert args.length == 16
     assert args.lower is True
-    assert args.upper is False
-    assert args.number is False
-    assert args.wildcards is False
+    assert args.upper is True
+    assert args.number is True
+    assert args.wildcards is True
 
 
 def test_cli_integration_success() -> None:

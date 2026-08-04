@@ -13,10 +13,10 @@ MAX_LENGTH = 32
 
 def generate_password(
     length: int = 16,
-    upper: bool = False,
+    upper: bool = True,
     lower: bool = True,
-    number: bool = False,
-    wildcards: bool = False,
+    number: bool = True,
+    wildcards: bool = True,
 ) -> str:
     """Gera uma senha segura com base nos criterios selecionados.
 

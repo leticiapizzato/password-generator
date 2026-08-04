@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import string
 
 from generator import MAX_LENGTH, MIN_LENGTH
+
+#: O argparse aplica %-formatting nas mensagens de ajuda, entao o "%" presente
+#: em string.punctuation precisa ser escapado para nao quebrar o --help.
+PUNCTUATION_FOR_HELP = string.punctuation.replace("%", "%%")
 
 
 def parse_length(value: str) -> int:
@@ -44,26 +49,26 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--upper",
         action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Habilita ou desabilita letras maiusculas (padrao: desabilitado).",
+        default=True,
+        help="Habilita ou desabilita letras maiusculas.",
     )
     parser.add_argument(
         "--lower",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Habilita ou desabilita letras minusculas (padrao: habilitado).",
+        help="Habilita ou desabilita letras minusculas.",
     )
     parser.add_argument(
         "--number",
         action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Habilita ou desabilita numeros (padrao: desabilitado).",
+        default=True,
+        help="Habilita ou desabilita numeros.",
     )
     parser.add_argument(
         "--wildcards",
         action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Habilita ou desabilita caracteres especiais (padrao: desabilitado).",
+        default=True,
+        help=f"Habilita ou desabilita caracteres especiais ({PUNCTUATION_FOR_HELP}).",
     )
     parser.add_argument(
         "--length",
