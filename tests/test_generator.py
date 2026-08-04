@@ -14,8 +14,19 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
+import generator
 from cli_argparse import build_parser
 from generator import MAX_LENGTH, MIN_LENGTH, generate_password
+
+
+def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
+    """Executa a CLI como subprocesso e devolve o resultado."""
+    return subprocess.run(
+        [sys.executable, str(SRC_DIR / "main.py"), *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
 
 def test_generate_password_fails_for_length_below_minimum() -> None:
@@ -123,3 +134,132 @@ def test_cli_installed_entrypoint_success() -> None:
 
     assert result.returncode == 0
     assert len(result.stdout.strip()) == 16
+
+
+# --- RN07: fonte criptografica de aleatoriedade (risco R01) -------------------
+
+
+def test_generate_password_uses_secrets_module(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A geracao deve obter cada caractere via secrets.choice."""
+    calls: list[str] = []
+    real_choice = generator.secrets.choice
+
+    def spy(sequence: str) -> str:
+        calls.append(sequence)
+        return real_choice(sequence)
+
+    monkeypatch.setattr(generator.secrets, "choice", spy)
+    password = generate_password(length=16)
+
+    assert len(calls) == 16
+    assert len(password) == 16
+
+
+def test_generator_does_not_import_insecure_random() -> None:
+    """Guarda contra regressao do CSPRNG para o modulo random.
+
+    O modulo ``random`` e adequado para simulacao, nao para segredos. Este
+    teste falha se uma refatoracao futura reintroduzi-lo no core.
+    """
+    source = Path(generator.__file__).read_text(encoding="utf-8")
+
+    assert "import random" not in source
+
+
+def test_generated_passwords_do_not_collide() -> None:
+    """Mil senhas geradas devem ser todas distintas (risco R07)."""
+    passwords = {generate_password(length=16) for _ in range(1000)}
+
+    assert len(passwords) == 1000
+
+
+# --- RN02: limites inclusivos da faixa de tamanho -----------------------------
+
+
+@pytest.mark.parametrize("length", [MIN_LENGTH, MAX_LENGTH])
+def test_generate_password_accepts_inclusive_bounds(length: int) -> None:
+    """Os limites 8 e 32 devem ser aceitos, nao rejeitados."""
+    assert len(generate_password(length=length)) == length
+
+
+# --- RN06: classes desligadas nao aparecem na senha ---------------------------
+
+
+def test_disabled_class_is_absent_from_password() -> None:
+    """Uma classe desligada nao deve aparecer na senha gerada."""
+    password = generate_password(
+        length=32,
+        lower=False,
+        upper=True,
+        number=True,
+        wildcards=False,
+    )
+
+    assert not any(char in string.ascii_lowercase for char in password)
+    assert not any(char in string.punctuation for char in password)
+    assert any(char in string.ascii_uppercase for char in password)
+    assert any(char in string.digits for char in password)
+
+
+def test_special_characters_belong_to_expected_set() -> None:
+    """Os especiais usados devem ser exatamente os de string.punctuation."""
+    password = generate_password(
+        length=32,
+        lower=False,
+        upper=False,
+        number=False,
+        wildcards=True,
+    )
+
+    assert all(char in string.punctuation for char in password)
+
+
+# --- RN10/RF15: contrato de saida da CLI --------------------------------------
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--length", "33"],
+        ["--length", "7"],
+        ["--length", "abc"],
+        ["--no-lower", "--no-upper", "--no-number", "--no-wildcards"],
+    ],
+)
+def test_cli_error_contract(args: list[str]) -> None:
+    """Erros devem sair com codigo 2, stdout vazio e mensagem em stderr."""
+    result = run_cli(*args)
+
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert result.stderr.strip() != ""
+
+
+def test_cli_success_contract() -> None:
+    """Sucesso deve sair com codigo 0, senha em stdout e stderr vazio."""
+    result = run_cli("--length", "24")
+
+    assert result.returncode == 0
+    assert result.stderr == ""
+    assert len(result.stdout.strip()) == 24
+    assert result.stdout.count("\n") == 1
+
+
+# --- RF16: ajuda de uso -------------------------------------------------------
+
+
+def test_cli_help_lists_all_parameters() -> None:
+    """A ajuda deve listar todos os parametros e sair com codigo 0."""
+    result = run_cli("--help")
+
+    assert result.returncode == 0
+    for flag in ("--length", "--lower", "--upper", "--number", "--wildcards"):
+        assert flag in result.stdout
+
+
+def test_cli_help_documents_length_range() -> None:
+    """A ajuda deve informar a faixa valida e o padrao de --length."""
+    result = run_cli("--help")
+
+    assert f"entre {MIN_LENGTH} e {MAX_LENGTH}" in result.stdout
+    assert "16" in result.stdout
