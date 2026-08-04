@@ -4,9 +4,16 @@ from __future__ import annotations
 
 import argparse
 
+from generator import MAX_LENGTH, MIN_LENGTH
 
-def validate_length(value: str) -> int:
-    """Valida o argumento de tamanho da senha para a CLI.
+
+def parse_length(value: str) -> int:
+    """Converte o argumento de tamanho da senha para inteiro.
+
+    A validacao da faixa permitida NAO acontece aqui: ela e responsabilidade
+    unica de ``generator.generate_password``, que e chamado em seguida por
+    ``main``. Manter a regra em um so lugar evita mensagens divergentes entre
+    a CLI e o core.
 
     Args:
         value: Valor recebido pela linha de comando.
@@ -15,21 +22,14 @@ def validate_length(value: str) -> int:
         Tamanho convertido para inteiro.
 
     Raises:
-        argparse.ArgumentTypeError: Se o valor estiver fora do intervalo 8..32.
+        argparse.ArgumentTypeError: Se o valor nao for um inteiro valido.
     """
     try:
-        length = int(value)
+        return int(value)
     except ValueError as error:
         raise argparse.ArgumentTypeError(
             "O valor de --length deve ser um numero inteiro."
         ) from error
-
-    if length < 8 or length > 32:
-        raise argparse.ArgumentTypeError(
-            "O valor de --length deve estar entre 8 e 32."
-        )
-
-    return length
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -67,9 +67,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--length",
-        type=validate_length,
+        type=parse_length,
         default=16,
-        help="Quantidade de caracteres da senha (entre 8 e 32, padrao: 16).",
+        help=(
+            f"Quantidade de caracteres da senha "
+            f"(entre {MIN_LENGTH} e {MAX_LENGTH}, padrao: 16)."
+        ),
     )
     return parser
 

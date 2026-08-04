@@ -15,19 +15,19 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from cli_argparse import build_parser
-from generator import generate_password
+from generator import MAX_LENGTH, MIN_LENGTH, generate_password
 
 
 def test_generate_password_fails_for_length_below_minimum() -> None:
-    """Deve falhar quando o tamanho for menor que 8."""
-    with pytest.raises(ValueError, match="minimo"):
-        generate_password(length=7)
+    """Deve falhar quando o tamanho for menor que MIN_LENGTH."""
+    with pytest.raises(ValueError, match="entre 8 e 32"):
+        generate_password(length=MIN_LENGTH - 1)
 
 
 def test_generate_password_fails_for_length_above_maximum() -> None:
-    """Deve falhar quando o tamanho for maior que 32."""
-    with pytest.raises(ValueError, match="maximo"):
-        generate_password(length=33)
+    """Deve falhar quando o tamanho for maior que MAX_LENGTH."""
+    with pytest.raises(ValueError, match="entre 8 e 32"):
+        generate_password(length=MAX_LENGTH + 1)
 
 
 def test_generate_password_fails_when_no_class_is_active() -> None:
@@ -68,28 +68,6 @@ def test_generate_password_fails_for_invalid_length_type() -> None:
     """Deve falhar quando o tipo de length nao for inteiro."""
     with pytest.raises(TypeError, match="tipo inteiro"):
         generate_password(length="16")  # type: ignore[arg-type]
-
-
-@pytest.mark.xfail(
-    strict=True,
-    reason="RF10 inalcancavel: length >= 8 e validado antes e ha no maximo 4 classes. "
-    "Ver requisitos/analise-elicitacao.md secao 7.1.",
-)
-def test_generate_password_fails_for_incompatible_length_and_classes() -> None:
-    """Deve falhar para configuracao incompativel de tamanho e classes.
-
-    O ``match`` explicito revela que a excecao levantada e a da faixa de tamanho
-    (RN02), e nao a da compatibilidade com as classes (RN05). Sem ele, o teste
-    passava capturando qualquer ValueError.
-    """
-    with pytest.raises(ValueError, match="numero de classes"):
-        generate_password(
-            length=3,
-            upper=True,
-            lower=True,
-            number=True,
-            wildcards=True,
-        )
 
 
 def test_cli_parser_defaults() -> None:

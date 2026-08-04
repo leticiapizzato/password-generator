@@ -5,6 +5,11 @@ from __future__ import annotations
 import secrets
 import string
 
+#: Limites de tamanho da senha. Fonte unica de verdade: a CLI importa estas
+#: constantes em vez de repetir os valores (evita divergencia entre camadas).
+MIN_LENGTH = 8
+MAX_LENGTH = 32
+
 
 def generate_password(
     length: int = 16,
@@ -27,18 +32,16 @@ def generate_password(
 
     Raises:
         TypeError: Se o tipo de length nao for inteiro.
-        ValueError: Se o tamanho solicitado for menor que 8.
-        ValueError: Se o tamanho solicitado for maior que 32.
+        ValueError: Se o tamanho estiver fora da faixa permitida.
         ValueError: Se nenhuma classe de caractere for selecionada.
-        ValueError: Se o tamanho for menor que a quantidade de classes ativas.
     """
     if not isinstance(length, int):
         raise TypeError("O parametro length deve ser do tipo inteiro.")
 
-    if length < 8:
-        raise ValueError("O tamanho minimo recomendado e 8 caracteres.")
-    if length > 32:
-        raise ValueError("O tamanho maximo permitido e 32 caracteres.")
+    if not MIN_LENGTH <= length <= MAX_LENGTH:
+        raise ValueError(
+            f"O tamanho da senha deve estar entre {MIN_LENGTH} e {MAX_LENGTH}."
+        )
 
     selected_sets: list[str] = []
     if upper:
@@ -53,10 +56,9 @@ def generate_password(
     if not selected_sets:
         raise ValueError("Selecione ao menos uma classe de caractere.")
 
-    if length < len(selected_sets):
-        raise ValueError(
-            "O tamanho da senha deve ser maior ou igual ao numero de classes ativas."
-        )
+    # Nao ha checagem de "tamanho < numero de classes": com MIN_LENGTH = 8 e no
+    # maximo 4 classes, a condicao e sempre falsa. A validacao existia e era
+    # codigo morto (RF10). Ver requisitos/analise-elicitacao.md secao 7.1.
 
     # Garante ao menos um caractere de cada classe selecionada.
     password_chars = [secrets.choice(chars) for chars in selected_sets]
