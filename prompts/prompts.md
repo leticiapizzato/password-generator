@@ -297,6 +297,50 @@ Existem várias modifiçãoes. Faça commit por módulo, utilizando conventional
 Lembre-se de executar o push.
 ```
 
+---
+
+## Curso 10: Engenharia de Requisitos com IA Generativa
+
+#### Prompt 40 - Análise do documento de elicitação
+```powershell
+Contexto: O arquivo docs/escopo-mvp.md é o documento produzido na etapa de elicitação de requisitos.
+Objetivo: Analisar criticamente esse documento e identificar requisitos funcionais, regras de negócio,
+requisitos não funcionais, lacunas e ambiguidades.
+Importante: não confie apenas no texto. Compare o documento com o código real em src/ e tests/, e
+execute a CLI para verificar o comportamento efetivo. Aponte onde documento e produto divergem.
+Estilo: Linguagem técnica, direta, com markdown e tabelas.
+Resposta: Arquivo requisitos/analise-elicitacao.md.
+```
+
+#### Prompt 41 - Seleção e elaboração dos artefatos de especificação
+```powershell
+Contexto: Análise da elicitação concluída em requisitos/analise-elicitacao.md.
+Objetivo: Selecionar os artefatos de especificação mais adequados a este projeto e elaborá-los.
+Justifique a escolha a partir dos defeitos encontrados na análise, e justifique também os artefatos
+que você decidiu NÃO produzir.
+Estilo: Critérios de aceite em Gherkin; casos de uso com fluxos alternativos e de exceção.
+Resposta: requisitos/historias-usuario.md, requisitos/casos-de-uso.md e requisitos/rastreabilidade.md.
+```
+
+#### Prompt 42 - Protótipo de interface para CLI
+```powershell
+Contexto: O projeto é uma CLI, não tem interface gráfica.
+Objetivo: Produzir o equivalente a um protótipo para uma aplicação de terminal.
+Importante: capture as saídas REAIS executando o projeto, não escreva exemplos fictícios.
+Se o comportamento observado divergir do documentado, sinalize.
+Resposta: Arquivo requisitos/prototipo-cli.md.
+```
+
+> **Nota:** foi o Prompt 42 que expôs o achado mais relevante desta etapa. Ao tentar **reproduzir** o
+> fluxo de exceção do RF10 para o protótipo, constatou-se que ele é inatingível por qualquer entrada
+> (código morto) e que o teste que o cobria passava pelo motivo errado. A instrução de "capturar saída
+> real em vez de escrever exemplo" foi o que transformou uma revisão documental em verificação.
+
+#### Prompt 43 - Commits
+```powershell
+Faça commit por documento, utilizando conventional commits.
+```
+
 
 
 
