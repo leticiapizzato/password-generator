@@ -44,7 +44,14 @@ def build_parser() -> argparse.ArgumentParser:
         Parser configurado com os argumentos da linha de comando.
     """
     parser = argparse.ArgumentParser(
-        description="Gerador de senhas seguras (argparse)."
+        # Sem prog, o argparse usa sys.argv[0] e a ajuda exibe "main.py" para
+        # quem instalou o pacote e digita "password-gen-argparse".
+        prog="password-gen-argparse",
+        description=(
+            "Gerador de senhas seguras. Por padrao a senha usa as quatro "
+            "classes de caractere; desligue as que o sistema de destino nao "
+            "aceitar com --no-upper, --no-number ou --no-wildcards."
+        ),
     )
     parser.add_argument(
         "--upper",
