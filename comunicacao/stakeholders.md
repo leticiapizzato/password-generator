@@ -4,9 +4,9 @@
 |-------|-------|
 | **Projeto** | Password Generator (MVP — CLI de geração de senhas seguras) |
 | **Contexto acadêmico** | UFG — C4 |
-| **Documento** | Atualização de projeto e riscos |
-| **Data** | 2026-07-16 |
-| **Versão do documento** | 1.1 (após revisão crítica dos riscos) |
+| **Documento** | Atualização de projeto, requisitos e riscos |
+| **Data** | 2026-07-16 (atualizado em 2026-08-04) |
+| **Versão do documento** | 2.0 (após a etapa de engenharia de requisitos) |
 | **Período de referência** | Fase de preparação do release v1.0.0 |
 | **Destinatários** | Stakeholders do projeto (orientação do curso, equipe e demais interessados) |
 
@@ -28,50 +28,61 @@ a documentação está em `riscos/`.
 
 ## 2. Riscos identificados (resumo)
 
-A revisão crítica reduziu o quadro de **11 para 9 riscos**, ao descartar dois itens cujas premissas se
-mostraram **incorretas** após verificação (ver seção 5). **Não há atualmente risco de nível crítico ou
-bloqueante.** Os riscos de maior atenção são de nível **Alto**:
+Após a etapa de engenharia de requisitos, **4 dos 9 riscos foram resolvidos ou mitigados** e 1 está em
+andamento. **Não há risco crítico ou bloqueante.**
 
-| Prioridade | ID | Risco | Nível |
-|-----------|----|-------|-------|
-| 1 | R02 | Exposição da senha gerada no terminal/histórico | Alto |
-| 2 | R03 | Configuração padrão de baixa entropia (apenas minúsculas por padrão) | Alto |
-| 3 | R09 | Versionamento desalinhado (`0.1.0` no pacote vs `1.0.0` planejado) | Alto |
-| 4 | R11 | Baixo fator de continuidade (bus factor) do projeto | Alto |
+| ID | Risco | Situação |
+|----|-------|----------|
+| R01 | Regressão na fonte de aleatoriedade | ✅ Mitigado — dois testes garantem o uso de `secrets` |
+| R03 | Configuração padrão de baixa entropia | ✅ **Eliminado** — padrão passou a usar as quatro classes |
+| R07 | Cobertura da aleatoriedade | ✅ Mitigado — teste de 1000 senhas distintas |
+| R08 | Inconsistência entre validações CLI/core | ✅ Resolvido — validação centralizada no core |
+| R09 | Versionamento desalinhado | 🔄 Em andamento — versão elevada para `1.0.0`; resta a tag |
+| R02 | Exposição da senha no terminal | ⚠️ Em aberto — risco do ambiente, não da aplicação |
+| R04 | Dependência de versão do Python | ⚠️ Em aberto |
+| R06 | Divergência entre dev (Windows) e CI (Linux) | ⚠️ Em aberto |
+| R11 | Baixo fator de continuidade (bus factor) | ⚠️ Em aberto |
 
-Demais riscos, de nível **Médio/Baixo**: regressão na fonte de aleatoriedade (R01), dependência de
-versão do Python (R04), divergência entre Windows e CI Linux (R06), cobertura de testes de aleatoriedade
-(R07) e inconsistência de validações CLI/core (R08). O detalhamento completo está em
-`riscos/identificacao.md` e `riscos/analise.md`.
+Os quatro riscos remanescentes **não dizem respeito ao produto em si**: tratam do ambiente de uso, do
+ambiente de execução e da estrutura da equipe. Detalhamento em `riscos/identificacao.md`, seção 6.
 
-## 3. Ações em andamento
+## 3. Trabalho realizado na etapa
 
-- **Governança de riscos revisada:** identificação, análise e plano de respostas atualizados após a
-  revisão crítica, com dois riscos descartados por premissa incorreta.
-- **R09:** alinhamento de versionamento (bump para `1.0.0` em commit dedicado) conforme o checklist de
-  release.
-- **R03:** avaliação dos padrões de composição da senha e reforço da orientação de uso no README/`--help`.
-- **R02:** documentação de boas práticas de uso para reduzir a retenção do segredo no terminal.
+A especificação dos requisitos (`requisitos/`) revelou que **metade das regras que governam o produto não
+estava documentada**, e que um requisito era inválido. As correções decorrentes:
+
+- **Composição padrão (R03).** O comando sem argumentos gerava senha apenas com minúsculas (≈75 bits),
+  contradizendo o objetivo de "senhas fortes". Passou a ativar as quatro classes (≈105 bits). É uma
+  **mudança de comportamento** e será destacada nas notas da v1.0.0.
+- **Requisito RF10 removido.** A especificação demonstrou que a validação de "tamanho menor que o número
+  de classes" era **inalcançável por qualquer entrada** e que o teste que a cobria passava capturando
+  outra exceção. Requisito, regra e código foram removidos.
+- **Validação centralizada (R08).** A faixa 8..32 vivia duplicada na CLI e no core, com mensagens
+  diferentes. Passou a ter fonte única.
+- **Cobertura de testes.** De 11 para **24 testes**, cobrindo agora o uso de CSPRNG, a unicidade das
+  senhas, o contrato de saída e a ajuda de uso.
 
 ## 4. Próximos passos
 
-1. Executar o **checklist de release v1.0.0** (`docs/release.md`): version bump (R09), tag anotada
-   `v1.0.0`, validação manual dos cenários e notas de versão.
-2. Implementar mitigações de **segurança** priorizadas (R01, R02, R03).
-3. Reforçar **qualidade e portabilidade** (R06: incluir `windows-latest` na matriz de CI; R07: testes de
-   unicidade/propriedade; R08: centralizar validações).
-4. Reduzir o **bus factor** (R11) com documentação de onboarding e definição de responsável reserva.
-5. Reavaliar o quadro de riscos após o release e registrar o **backlog v1.1.0**.
+1. Concluir o **checklist de release v1.0.0** (`docs/release.md`): tag anotada `v1.0.0`, validação manual
+   e notas de versão **destacando a mudança de comportamento**.
+2. Reforçar **portabilidade** (R06: incluir `windows-latest` na matriz de CI).
+3. Reduzir o **bus factor** (R11) com documentação de onboarding e responsável reserva.
+4. Avaliar as decisões de requisitos ainda pendentes (`requisitos/analise-elicitacao.md`, seção 9.2),
+   entre elas o limiar mínimo de entropia.
+5. Registrar o **backlog v1.1.0**: geração em lote, exclusão de caracteres ambíguos e exibição de
+   entropia estimada.
 
 ## 5. Conclusões
 
-O MVP está funcional e aderente ao escopo. A **revisão crítica dos riscos** trouxe uma boa notícia: o
-item anteriormente sinalizado como **crítico/bloqueante** (pin de dependência de teste) era um **falso
-alarme** — verificou-se que o `pytest 9.0.3` está instalado e os testes passam — e outro item foi
-descartado por a documentação de release já estar **correta** quanto à branch (`master`). Com isso,
-**não resta risco crítico ou bloqueante**, e o projeto está **apto a seguir para o release v1.0.0**.
+O MVP está funcional e, agora, **aderente ao que promete**. A etapa de engenharia de requisitos trouxe um
+resultado que a gestão de riscos sozinha não havia alcançado: ao exigir que cada fluxo especificado fosse
+**reproduzido na prática**, expôs um requisito que parecia implementado e testado, mas não fazia nada — e
+um padrão de uso que contrariava o objetivo central do produto.
 
-Os riscos remanescentes de nível Alto (R02, R03, R09, R11) são gerenciáveis por mitigação planejada e não
-comprometem prazo ou escopo do MVP. Recomenda-se **aprovar a continuidade para o release v1.0.0**,
-condicionada apenas ao alinhamento de versionamento (R09) e à confirmação do CI verde. Novas atualizações
-serão comunicadas a cada marco relevante.
+Vale registrar o contraste: o quadro de riscos apontava R08 apenas como "validação duplicada", enquanto a
+especificação encontrou o defeito concreto por trás dele. As duas abordagens se complementaram.
+
+Com R03 eliminado e R01, R07 e R08 endereçados, **recomenda-se aprovar a continuidade para o release
+v1.0.0**, condicionada apenas à criação da tag e à confirmação do CI verde. Novas atualizações serão
+comunicadas a cada marco relevante.

@@ -5,8 +5,8 @@
 | **Projeto** | Password Generator (MVP — CLI de geração de senhas seguras) |
 | **Contexto acadêmico** | UFG — C4 |
 | **Documento** | Identificação de riscos |
-| **Data** | 2026-07-16 |
-| **Versão do documento** | 1.1 (revisão crítica) |
+| **Data** | 2026-07-16 (atualizado em 2026-08-04) |
+| **Versão do documento** | 1.2 (situação dos riscos após a etapa de engenharia de requisitos) |
 | **Fonte de análise** | Código-fonte (`src/`), testes (`tests/`), documentação (`docs/`, `README.md`), CI (`.github/workflows/ci.yml`), empacotamento (`pyproject.toml`) e verificação do repositório/ambiente (`git`, `.venv`) |
 
 ## 1. Objetivo
@@ -136,3 +136,29 @@ descartados** por não se sustentarem:
 |-------------|----------------|--------------------|
 | ~~R05~~ | Dependência de teste indisponível (`pytest>=9.0.0`) | **Premissa falsa.** O ambiente possui **pytest 9.0.3** instalado e a suíte passa; `pytest>=9.0.0` é uma restrição válida e satisfeita — não há bloqueio de instalação/CI. O único resíduo (ausência de limite superior no pin) é uma dívida menor de manutenção, insuficiente para caracterizar um risco relevante. |
 | ~~R10~~ | Documentação divergente da implementação (branch `master` vs `main`) | **Premissa falsa.** A branch principal do repositório é **`master`** (local e `origin/master`); portanto `docs/release.md` está **correto** ao usar `git push origin master`. O resíduo (número "11 passed" fixo no README) é trivial e não caracteriza risco de projeto. |
+
+## 6. Situação após a etapa de engenharia de requisitos (v1.2)
+
+A especificação dos requisitos (`requisitos/`) e os ajustes de código dela decorrentes alteraram o quadro
+de riscos. Atualização por item:
+
+| ID | Risco | Situação | Evidência |
+|----|-------|----------|-----------|
+| R01 | Regressão na fonte de aleatoriedade | ✅ **Mitigado** | `test_generate_password_uses_secrets_module` verifica o uso de `secrets.choice`; `test_generator_does_not_import_insecure_random` barra a reintrodução de `random` |
+| R02 | Exposição da senha no terminal/histórico | ⚠️ **Em aberto** | Risco do **ambiente**, não da aplicação. Segue válido |
+| R03 | Configuração padrão de baixa entropia | ✅ **Eliminado** | A composição padrão passou a ativar as quatro classes (≈105 bits). A causa deixou de existir |
+| R04 | Dependência de versão do Python | ⚠️ **Em aberto** | Sem mudança |
+| R06 | Divergência entre dev (Windows) e CI (Linux) | ⚠️ **Em aberto** | A matriz de CI segue apenas com `ubuntu-latest` |
+| R07 | Cobertura insuficiente do comportamento aleatório | ✅ **Mitigado** | `test_generated_passwords_do_not_collide` valida 1000 senhas distintas |
+| R08 | Inconsistência entre validações da CLI e do core | ✅ **Resolvido** | Faixa 8..32 centralizada em `MIN_LENGTH`/`MAX_LENGTH` no core; a CLI importa as constantes. Mensagem de erro passou a ser única |
+| R09 | Versionamento desalinhado com o release | 🔄 **Em andamento** | Version bump para `1.0.0` executado; resta a tag anotada |
+| R11 | Baixo fator de continuidade (bus factor) | ⚠️ **Em aberto** | Sem mudança |
+
+**Resumo:** de 9 riscos, **4 foram resolvidos ou mitigados** (R01, R03, R07, R08) e 1 está em andamento
+(R09). Os 4 remanescentes (R02, R04, R06, R11) não têm relação com o produto em si — dizem respeito ao
+ambiente de uso, ao ambiente de execução e à estrutura da equipe.
+
+> **Observação metodológica.** R08 foi **aprofundado** pela análise de requisitos: o registro original
+> falava em "validação duplicada", mas a especificação revelou que uma das validações era **inalcançável
+> por qualquer entrada** e que o teste que a cobria passava capturando outra exceção. A gestão de riscos
+> apontou a região certa; a engenharia de requisitos encontrou o defeito concreto.
