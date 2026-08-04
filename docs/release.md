@@ -25,10 +25,11 @@
 
 ## Consistência Funcional
 
-- [ ] Confirmar defaults da CLI: `length=16`, `lower=True`, demais `False`.
-- [ ] Confirmar que `--length` aceita apenas valores entre 8 e 32.
+- [ ] Confirmar defaults da CLI: `length=16` e as **quatro** classes habilitadas.
+- [ ] Confirmar que `--length` aceita apenas valores entre 8 e 32 (limites inclusivos).
 - [ ] Confirmar que a senha respeita o tamanho solicitado.
 - [ ] Confirmar que classes ativas aparecem na senha gerada.
+- [ ] Confirmar o contrato de saída: sucesso `0`, erro `2` com `stdout` vazio.
 
 ## Documentação
 
@@ -50,6 +51,10 @@
 - [ ] Enviar tags para o remoto (`git push origin v1.0.0`).
 - [ ] Criar release `v1.0.0` no GitHub com notas de versão.
 - [ ] Incluir no release notes: funcionalidades, validações e cobertura de testes.
+- [ ] **Destacar a breaking change**: a composição padrão passou a ativar as quatro
+      classes de caractere. Quem dependia da saída anterior (apenas minúsculas) deve
+      usar `--no-upper --no-number --no-wildcards`.
+- [ ] Registrar a remoção do RF10 (requisito inalcançável) nas notas de versão.
 
 ## Pós-Release
 

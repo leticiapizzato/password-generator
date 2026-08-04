@@ -97,21 +97,37 @@ python src/main.py --length 16
 ### Parâmetros da CLI
 
 - `--length`: tamanho da senha (8 a 32, padrão 16)
-- `--lower` / `--no-lower`: minúsculas (padrão habilitado)
-- `--upper` / `--no-upper`: maiúsculas (padrão desabilitado)
-- `--number` / `--no-number`: números (padrão desabilitado)
-- `--wildcards` / `--no-wildcards`: especiais (padrão desabilitado)
+- `--lower` / `--no-lower`: minúsculas (padrão **habilitado**)
+- `--upper` / `--no-upper`: maiúsculas (padrão **habilitado**)
+- `--number` / `--no-number`: números (padrão **habilitado**)
+- `--wildcards` / `--no-wildcards`: especiais (padrão **habilitado**)
 
-Exemplo:
-
-```powershell
-password-gen-argparse --length 20 --upper --number --wildcards
-```
-
-Exemplo de saída:
+Caracteres especiais utilizados:
 
 ```text
-bkaGsjZVX8Ft9VOFt9QL
+!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+```
+
+A senha sempre contém **ao menos um caractere de cada classe ativa**.
+
+Sem argumentos, a senha usa as quatro classes:
+
+```powershell
+password-gen-argparse
+```
+
+```text
+EuJf(~dkcv#oIRq8
+```
+
+Se o sistema de destino não aceitar símbolos, desligue a classe:
+
+```powershell
+password-gen-argparse --length 20 --no-wildcards
+```
+
+```text
+iVRXA3TiToHJxTk81MrE
 ```
 
 ## Targets do Makefile
@@ -124,11 +140,27 @@ bkaGsjZVX8Ft9VOFt9QL
 ## Erros Esperados
 
 - `--length` fora da faixa (ex.: 7 ou 33):
-  - `O valor de --length deve estar entre 8 e 32.`
+  - `O tamanho da senha deve estar entre 8 e 32.`
 - nenhuma classe ativa (`--no-lower --no-upper --no-number --no-wildcards`):
   - `Selecione ao menos uma classe de caractere.`
 - tipo inválido em `--length` (ex.: `abc`):
   - `O valor de --length deve ser um numero inteiro.`
+
+## Contrato de Saída
+
+Útil para uso em scripts:
+
+| Situação | `stdout` | `stderr` | Código de saída |
+|----------|----------|----------|-----------------|
+| Senha gerada | a senha, uma linha, sem rótulo | vazio | `0` |
+| `--help` | texto de ajuda | vazio | `0` |
+| Erro de validação | **vazio** | mensagem de erro | `2` |
+
+Como as mensagens de erro nunca vão para `stdout`, capturar a senha é seguro:
+
+```bash
+PASSWORD=$(password-gen-argparse --length 24)
+```
 
 ## Validação Rápida do Projeto
 
@@ -141,5 +173,5 @@ bkaGsjZVX8Ft9VOFt9QL
 Resultado esperado dos testes:
 
 ```text
-11 passed
+24 passed
 ```

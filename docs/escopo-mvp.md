@@ -21,22 +21,28 @@ Quando o tamanho não for informado, o sistema deve gerar senha com tamanho padr
 O sistema deve validar o tamanho informado e aceitar apenas valores entre **8** e **32** caracteres, retornando erro amigável para valores fora dessa faixa.
 
 ### RF05 - Seleção de uso de letras minúsculas
-O usuário deve poder habilitar ou desabilitar o uso de letras minúsculas na composição da senha por meio de opção de linha de comando.
+O usuário deve poder habilitar ou desabilitar o uso de letras minúsculas (`--lower` / `--no-lower`). **Padrão: habilitado.**
 
 ### RF06 - Seleção de uso de letras maiúsculas
-O usuário deve poder habilitar ou desabilitar o uso de letras maiúsculas na composição da senha por meio de opção de linha de comando.
+O usuário deve poder habilitar ou desabilitar o uso de letras maiúsculas (`--upper` / `--no-upper`). **Padrão: habilitado.**
 
 ### RF07 - Seleção de uso de números
-O usuário deve poder habilitar ou desabilitar o uso de dígitos numéricos na composição da senha por meio de opção de linha de comando.
+O usuário deve poder habilitar ou desabilitar o uso de dígitos numéricos (`--number` / `--no-number`). **Padrão: habilitado.**
 
 ### RF08 - Seleção de uso de caracteres especiais
-O usuário deve poder habilitar ou desabilitar o uso de caracteres especiais na composição da senha por meio de opção de linha de comando.
+O usuário deve poder habilitar ou desabilitar o uso de caracteres especiais (`--wildcards` / `--no-wildcards`). **Padrão: habilitado.**
+
+O conjunto de caracteres especiais é o de `string.punctuation`, com 32 símbolos:
+
+```text
+!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+```
 
 ### RF09 - Validação de critérios mínimos de composição
 O sistema deve validar que ao menos uma classe de caractere esteja habilitada (minúsculas, maiúsculas, números ou especiais), retornando erro claro caso nenhuma classe seja selecionada.
 
-### RF10 - Compatibilidade entre tamanho e critérios
-O sistema deve validar a compatibilidade entre o tamanho solicitado e os critérios ativos, retornando erro amigável em caso de inviabilidade.
+### ~~RF10 - Compatibilidade entre tamanho e critérios~~ (removido)
+**Requisito removido.** A análise de requisitos demonstrou que ele era inalcançável: como o tamanho mínimo (8) é validado antes e existem no máximo 4 classes, a condição "tamanho menor que o número de classes ativas" nunca se verifica. A validação correspondente era código morto e foi retirada do gerador. O identificador **não foi reaproveitado**, para preservar a rastreabilidade com os documentos anteriores. Detalhes em `requisitos/analise-elicitacao.md`, seção 7.1.
 
 ### RF11 - Interface CLI com argparse
 O projeto deve expor uma forma de execução via módulo/entrypoint com `argparse`, utilizando `src/main.py` como ponto de entrada.
@@ -46,6 +52,15 @@ A senha gerada deve ser exibida no `stdout`, em uma única linha, sem informaç�
 
 ### RF13 - Estrutura mínima de testes
 O projeto deve incluir testes automatizados cobrindo geração, tamanho e critérios de composição selecionáveis.
+
+### RF14 - Representatividade das classes ativas
+A senha gerada deve conter **ao menos um caractere de cada classe habilitada**, garantindo que uma classe ligada pelo usuário nunca fique ausente do resultado.
+
+### RF15 - Contrato de saída
+Em caso de sucesso, a senha deve ir para `stdout` e o processo encerrar com código **0**. Em caso de erro de validação, `stdout` deve permanecer vazio, a mensagem deve ir para `stderr` e o processo encerrar com código **2**.
+
+### RF16 - Ajuda de uso
+O sistema deve oferecer `--help` descrevendo todos os parâmetros, seus valores padrão, a faixa válida de tamanho e o conjunto de caracteres especiais.
 
 ## 3. Requisitos Não Funcionais
 
@@ -89,12 +104,15 @@ Os itens abaixo **não** fazem parte da primeira entrega:
 O MVP será considerado concluído quando:
 
 1. A geração de senha funcionar via `argparse`.
-2. O parâmetro `--length` for aceito na faixa de 8 a 32.
+2. O parâmetro `--length` for aceito na faixa de 8 a 32, com limites inclusivos.
 3. O usuário conseguir definir critérios de composição para minúsculas, maiúsculas, números e caracteres especiais.
 4. O valor padrão de 16 caracteres for aplicado quando não houver parâmetro.
-5. Configurações sem nenhuma classe de caractere ativa gerarem erro de validação claro.
-6. Houver ao menos um conjunto inicial de testes automatizados passando localmente.
-7. A documentação básica do projeto estiver disponível (`README` + este escopo).
+5. A composição padrão ativar as **quatro** classes de caractere.
+6. Cada classe ativa aparecer ao menos uma vez na senha gerada.
+7. Configurações sem nenhuma classe de caractere ativa gerarem erro de validação claro.
+8. O contrato de saída (códigos 0 e 2, `stdout`/`stderr`) ser respeitado.
+9. Houver um conjunto de testes automatizados passando localmente.
+10. A documentação básica do projeto estiver disponível (`README` + este escopo).
 
 ## 6. Entregáveis
 
