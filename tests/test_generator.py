@@ -70,9 +70,19 @@ def test_generate_password_fails_for_invalid_length_type() -> None:
         generate_password(length="16")  # type: ignore[arg-type]
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="RF10 inalcancavel: length >= 8 e validado antes e ha no maximo 4 classes. "
+    "Ver requisitos/analise-elicitacao.md secao 7.1.",
+)
 def test_generate_password_fails_for_incompatible_length_and_classes() -> None:
-    """Deve falhar para configuracao incompativel de tamanho e classes."""
-    with pytest.raises(ValueError):
+    """Deve falhar para configuracao incompativel de tamanho e classes.
+
+    O ``match`` explicito revela que a excecao levantada e a da faixa de tamanho
+    (RN02), e nao a da compatibilidade com as classes (RN05). Sem ele, o teste
+    passava capturando qualquer ValueError.
+    """
+    with pytest.raises(ValueError, match="numero de classes"):
         generate_password(
             length=3,
             upper=True,
