@@ -341,6 +341,33 @@ Resposta: Arquivo requisitos/prototipo-cli.md.
 Faça commit por documento, utilizando conventional commits.
 ```
 
+#### Prompt 44 - Ajustes decorrentes da análise de requisitos
+```powershell
+Contexto: A análise de requisitos listou regras de negócio não atendidas e falhas em requisitos
+funcionais.
+Objetivo: Sugerir os ajustes necessários, em ordem de importância, para que o produto final fique
+mais correto.
+Resposta: Plano de ajustes, sem implementar ainda.
+```
+
+#### Prompt 45 - Execução do plano
+```powershell
+Faça os ajustes, considerando ordem de importância para que eu tenha um produto no final mais correto.
+Depois, me mostre os commits, padronizados com conventional commits.
+Lembre-se de incrementar a versão do pacote, e da mesma forma fazer os ajustes em documentações
+pertinentes.
+```
+
+> **Decisão do solicitante neste ponto:** a composição padrão da senha passaria a ativar as **quatro
+> classes** de caractere. Foi a decisão que a análise não podia tomar sozinha, por ser de negócio e não
+> de engenharia — ela muda o comportamento do caminho mais usado do produto.
+
+> **Nota:** dois defeitos apareceram durante a execução, ambos capturados por testes escritos a partir
+> dos critérios de aceite. O primeiro era conhecido (o RF10 inalcançável). O segundo foi **introduzido
+> durante a própria correção**: ao enumerar os caracteres especiais na ajuda da CLI, o `%` de
+> `string.punctuation` quebrou o `--help`, porque o `argparse` aplica `%`-formatting nas mensagens. O
+> teste de US05, escrito minutos antes, pegou na hora.
+
 
 
 
