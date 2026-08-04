@@ -258,8 +258,15 @@ def test_cli_help_lists_all_parameters() -> None:
 
 
 def test_cli_help_documents_length_range() -> None:
-    """A ajuda deve informar a faixa valida e o padrao de --length."""
-    result = run_cli("--help")
+    """A ajuda deve informar a faixa valida e o padrao de --length.
 
-    assert f"entre {MIN_LENGTH} e {MAX_LENGTH}" in result.stdout
-    assert "16" in result.stdout
+    O texto e normalizado antes da verificacao porque o argparse quebra as
+    linhas conforme a largura do terminal: em COLUMNS=70, por exemplo, a faixa
+    sai como "entre 8 e\\n32". Sem normalizar, o teste passaria localmente e
+    falharia na CI apenas por diferenca de largura.
+    """
+    result = run_cli("--help")
+    help_text = " ".join(result.stdout.split())
+
+    assert f"entre {MIN_LENGTH} e {MAX_LENGTH}" in help_text
+    assert "padrao: 16" in help_text
