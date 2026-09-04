@@ -40,6 +40,77 @@ permitindo configurar tamanho e classes de caracteres.
 - `comunicacao/stakeholders.md`: comunicado de atualização do projeto.
 - `docs/release.md`: checklist de release v1.0.0.
 
+### Discovery — Diagrams as Code (Unidade III)
+
+- `docs/discovery-diagrams-as-code.md`: descrição do sistema em linguagem natural,
+  diagramas em Mermaid (containers C4 e sequência) e as decisões/ajustes sobre o que a
+  GenAI gerou. Os diagramas renderizados também aparecem na seção abaixo.
+
+## Arquitetura (Diagrams as Code)
+
+Diagramas versionáveis em Mermaid, pensados para servir de contexto a agentes de
+desenvolvimento. Detalhes, decisões e ajustes em
+[`docs/discovery-diagrams-as-code.md`](docs/discovery-diagrams-as-code.md).
+
+### Visão de containers (C4 nível 2)
+
+```mermaid
+flowchart TB
+    user([Usuário no terminal])
+
+    subgraph sys["Password Generator (aplicação CLI)"]
+        entry["main.py<br/>Ponto de entrada<br/><i>orquestra o fluxo</i>"]
+        parser["cli_argparse.py<br/>Parser de argumentos<br/><i>lê e converte a entrada</i>"]
+        core["generator.py<br/>Core de geração<br/><i>regras de negócio</i>"]
+    end
+
+    stdlib["Biblioteca padrão do Python<br/>secrets + string<br/><i>CSPRNG e alfabetos</i>"]
+
+    user -->|"argumentos (--length, --upper, ...)"| entry
+    entry -->|"build_parser() / parse_args()"| parser
+    parser -->|"argumentos convertidos"| entry
+    entry -->|"generate_password(criterios)"| core
+    core -->|"secrets.choice / SystemRandom"| stdlib
+    core -->|"senha gerada"| entry
+    entry -->|"stdout: senha (código 0)"| user
+    entry -.->|"stderr: erro (código 2)"| user
+```
+
+### Jornada crítica — gerar uma senha
+
+```mermaid
+sequenceDiagram
+    actor U as Usuário
+    participant M as main.py
+    participant P as cli_argparse.py
+    participant G as generator.py
+    participant S as secrets (CSPRNG)
+
+    U->>M: password-gen-argparse --length 16
+    M->>P: build_parser() + parse_args()
+    P->>P: parse_length() converte tipo
+    alt --length não é inteiro
+        P-->>U: stderr "--length deve ser inteiro" (código 2)
+    else argumentos válidos
+        P-->>M: Namespace(length, upper, lower, number, wildcards)
+        M->>G: generate_password(criterios)
+        alt length fora de 8..32
+            G-->>M: ValueError "tamanho entre 8 e 32"
+            M-->>U: stderr + código 2
+        else nenhuma classe ativa
+            G-->>M: ValueError "selecione ao menos uma classe"
+            M-->>U: stderr + código 2
+        else critérios válidos
+            G->>G: monta alfabetos das classes ativas
+            G->>S: choice() 1 char por classe + preenche o resto
+            S-->>G: caracteres aleatórios seguros
+            G->>G: SystemRandom().shuffle()
+            G-->>M: senha
+            M-->>U: stdout: senha (código 0)
+        end
+    end
+```
+
 ## Pré-requisitos
 
 - Python 3.10.5 no `PATH`
