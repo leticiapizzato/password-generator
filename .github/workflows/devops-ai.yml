@@ -1,0 +1,92 @@
+name: DevOps AI Diagnosis
+
+# Execucao manual: Actions > DevOps AI Diagnosis > Run workflow.
+# Marque inject_bug para simular o erro intencional e gerar o prompt de diagnostico.
+on:
+  workflow_dispatch:
+    inputs:
+      inject_bug:
+        description: "Injetar erro intencional (off-by-one em MAX_LENGTH)"
+        type: boolean
+        default: false
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Inject intentional bug
+        if: ${{ inputs.inject_bug }}
+        run: |
+          echo "[lab] Injetando erro intencional em src/generator.py"
+          sed -i 's/<= length <= MAX_LENGTH/<= length < MAX_LENGTH/' src/generator.py
+
+      - name: Run tests
+        run: |
+          set +e
+          pytest -q > pytest.log 2>&1
+          code=$?
+          cat pytest.log
+          exit $code
+
+      # always(): o log e o codigo testado precisam existir mesmo quando os testes falham.
+      - name: Upload test evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence
+          path: |
+            pytest.log
+            src/generator.py
+          retention-days: 7
+
+  ai-diagnosis:
+    needs: tests
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # Sobrescreve src/generator.py com a versao realmente testada (com o bug).
+      - name: Download test evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: test-evidence
+          path: .
+
+      - name: Build AI prompt
+        run: |
+          python scripts/ai_diagnose.py --log pytest.log --out ai-prompt.md
+          cat ai-prompt.md
+          cat ai-prompt.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload AI prompt
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-prompt
+          path: ai-prompt.md
+          retention-days: 7
